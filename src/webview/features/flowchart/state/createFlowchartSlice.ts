@@ -697,6 +697,46 @@ export const createFlowchartSlice: StateCreator<
     });
   },
 
+  setAllEdgeRouteModes: (routeMode) => {
+    const { nodes, edges, documentSession, isLocked } = get();
+    if (isLocked || edges.length === 0) return;
+    if (!documentSession) {
+      const nextEdges = edges.map((edge) => {
+        const { waypoints, ...dataWithoutWaypoints } = edge.data ?? {};
+        const data = {
+          ...dataWithoutWaypoints,
+          routeMode,
+          ...(routeMode === "orthogonal" && waypoints ? { waypoints } : {}),
+        };
+        return JSON.stringify(edge.data) === JSON.stringify(data) ? edge : { ...edge, data };
+      });
+      if (nextEdges.every((edge, index) => edge === edges[index])) return;
+      get().commitLegacyHistory({ nodes, edges: nextEdges });
+      return;
+    }
+    try {
+      const result = executeFlowchartEdgeRoutingCommand(
+        documentSession,
+        { kind: "set-all-modes", routeMode },
+        { createId: () => crypto.randomUUID() },
+      );
+      if (!result.ok) {
+        if (result.code !== "invalid-operation") set(reportCommandFailure(result, "set all edge route modes"));
+        return;
+      }
+      const projected = projectSessionModel(result.value, nodes);
+      set({
+        documentSession: result.value,
+        codeSource: result.value.source,
+        ...projected,
+        isDirty: result.value.dirty,
+        announcement: `Routed all edges as ${routeMode}`,
+      });
+    } catch (error) {
+      set(reportCommandFailure(unexpectedCommandFailure(error), "set all edge route modes"));
+    }
+  },
+
   setNodeConnectionPolicy: (policy) => {
     const { nodes, documentSession, isLocked } = get();
     if (isLocked || !documentSession) return;

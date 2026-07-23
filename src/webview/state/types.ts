@@ -154,6 +154,7 @@ export interface FlowchartSlice {
   }, routeMode?: NewEdgeRouteMode) => void;
   setEdgeStyle: (id: string, style: EdgeStyle) => void;
   setEdgeRouteMode: (id: string, routeMode: EdgeRouteMode) => void;
+  setAllEdgeRouteModes: (routeMode: Exclude<EdgeRouteMode, "manual">) => void;
   setNodeConnectionPolicy: (policy: FlowchartNodeConnections) => void;
   setEdgeAttachmentSide: (
     id: string,

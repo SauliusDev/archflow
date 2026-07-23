@@ -228,6 +228,70 @@ describe('createFlowchartSlice edge defaults', () => {
     expect(useStore.getState().edges[0].data).toEqual({ style: 'arrow', routeMode: 'curved' })
     expect(useStore.getState().history.past).toHaveLength(2)
   })
+
+  it('routes every legacy edge in one history entry and undo restores their routes', () => {
+    const waypoints = [{ x: 40, y: 60 }]
+    useStore.setState({
+      nodes: [],
+      edges: [
+        makeEdge('e-a-b', 'a', 'b', { data: { style: 'arrow', routeMode: 'orthogonal', waypoints, sourceSide: 'right', targetSide: 'left' } }),
+        makeEdge('e-b-c', 'b', 'c', { data: { style: 'line', routeMode: 'curved', sourceSide: 'bottom', targetSide: 'top' } }),
+      ],
+      history: { past: [], future: [] },
+      documentSession: null,
+      isLocked: false,
+    })
+
+    useStore.getState().setAllEdgeRouteModes('straight')
+
+    expect(useStore.getState().edges.map(edge => edge.data)).toEqual([
+      { style: 'arrow', routeMode: 'straight', sourceSide: 'right', targetSide: 'left' },
+      { style: 'line', routeMode: 'straight', sourceSide: 'bottom', targetSide: 'top' },
+    ])
+    expect(useStore.getState().history.past).toHaveLength(1)
+
+    useStore.getState().undo()
+    expect(useStore.getState().edges.map(edge => edge.data)).toEqual([
+      { style: 'arrow', routeMode: 'orthogonal', waypoints, sourceSide: 'right', targetSide: 'left' },
+      { style: 'line', routeMode: 'curved', sourceSide: 'bottom', targetSide: 'top' },
+    ])
+  })
+
+  it('does not route legacy edges while locked, empty, or already semantically unchanged', () => {
+    const edge = makeEdge('e-a-b', 'a', 'b', { data: { style: 'arrow', routeMode: 'curved' } })
+    useStore.setState({ nodes: [], edges: [edge], history: { past: [], future: [] }, documentSession: null, isLocked: true })
+    useStore.getState().setAllEdgeRouteModes('straight')
+    expect(useStore.getState().edges).toEqual([edge])
+    expect(useStore.getState().history.past).toHaveLength(0)
+
+    useStore.setState({ isLocked: false, edges: [], history: { past: [], future: [] } })
+    useStore.getState().setAllEdgeRouteModes('straight')
+    expect(useStore.getState().history.past).toHaveLength(0)
+
+    useStore.setState({ edges: [edge], history: { past: [], future: [] } })
+    useStore.getState().setAllEdgeRouteModes('curved')
+    expect(useStore.getState().history.past).toHaveLength(0)
+  })
+
+  it('persists document-wide routes and announces a successful update', () => {
+    const source = 'flowchart LR\n  A[Alpha]\n  B[Beta]\n  C[Charlie]\n  A e1@--> B\n  B e2@--> C\n'
+    const projection = flowchartCompatibilityAdapter.parse(source, 1)
+    const layout: LayoutStateV2 = {
+      version: 2, diagramFamily: 'flowchart', viewport: { x: 0, y: 0, zoom: 1 }, elements: {},
+      edges: { 'edge:e1': { routeMode: 'orthogonal', waypoints: [{ x: 80, y: 40 }] } }, constraints: [],
+    }
+    useStore.getState().initializeDocumentSession(createDocumentSession('bulk-route-store', 1, projection, layout))
+    useStore.getState().importFromCode(projection.model)
+
+    useStore.getState().setAllEdgeRouteModes('curved')
+
+    expect(useStore.getState().documentSession?.layout.edges).toEqual({
+      'edge:e1': { routeMode: 'curved' },
+      'edge:e2': { routeMode: 'curved' },
+    })
+    expect(useStore.getState().announcement).toBe('Routed all edges as curved')
+    expect(useStore.getState().documentSession?.history.past).toHaveLength(1)
+  })
 })
 
 describe('createFlowchartSlice visual identifiers', () => {
