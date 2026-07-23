@@ -85,7 +85,7 @@ export default function App(): React.JSX.Element {
           <NewEdgeRouteModeContext.Provider value={newEdgeRouteMode}>
             <PanelLayout
               panelVisible={panelVisible}
-              canvas={canvasSupported ? <Canvas snapToGrid={snapToGrid} layoutStyle={layoutStyle} /> : <CodePreviewFallback family={diagramFamily} reason={fallbackReason ?? undefined} />}
+              canvas={canvasSupported ? <Canvas snapToGrid={snapToGrid} layoutStyle={layoutStyle} /> : <CodePreviewFallback family={diagramFamily} reason={fallbackReason ?? undefined} onOpenCode={() => setPanelVisible({ canvas: false, code: true, preview: false })} />}
               code={<React.Suspense fallback={<div className="code-panel-loading" />}><CodePanel /></React.Suspense>}
               preview={<React.Suspense fallback={<div className="preview-panel-loading" />}><PreviewPanel /></React.Suspense>}
             />

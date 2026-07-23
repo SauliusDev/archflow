@@ -82,6 +82,38 @@ describe('flowchartCompatibilityAdapter', () => {
     expect((initialized.model as FlowchartAdapterModel).ambiguousNodeIds).toEqual(new Set())
   })
 
+  it('renders referenced-only nodes without treating them as ambiguous declarations', () => {
+    const source = [
+      'flowchart TD',
+      '  User([User]) --> Web[Web App]',
+      '  Web e6@-->|API response| Response',
+      '  Response --> User',
+      '',
+    ].join('\n')
+
+    const initialized = initializeAdapterProjection('flowchart', source, 1)
+
+    expect(initialized.diagnostics).not.toContainEqual(expect.objectContaining({ code: 'code-preview-fallback' }))
+    expect((initialized.model as FlowchartAdapterModel).ambiguousNodeIds).not.toContain('Response')
+  })
+
+  it('keeps the unchanged inline endpoint declaration when retargeting an edge', () => {
+    const inline = 'flowchart TD\n  A[Alpha] --> B[Beta]\n  C[Charlie]\n'
+    const parsed = flowchartCompatibilityAdapter.parse(inline, 1)
+    const edge = parsed.model.edges[0]!
+    const result = applySourceOperations(
+      parsed.concrete,
+      issueFlowchartOperation(parsed, { kind: 'update-edge', id: edge.id, target: 'C' }),
+      (candidate, revision) => ({ valid: true, concrete: flowchartCompatibilityAdapter.parse(candidate, revision).concrete }),
+    )
+
+    expect(result.success).toBe(true)
+    if (!result.success) return
+    expect(result.document.source).toContain('A[Alpha]')
+    expect(initializeAdapterProjection('flowchart', result.document.source, 2).diagnostics)
+      .not.toContainEqual(expect.objectContaining({ code: 'code-preview-fallback' }))
+  })
+
   it('projects existing nodes, subgraphs, and stable repeated edge identities through the registry', () => {
     const initialized = new AdapterRegistry([flowchartCompatibilityAdapter]).initialize('flowchart', source, 1)
     expect(initialized.status).toBe('ready')
@@ -151,17 +183,17 @@ describe('flowchartCompatibilityAdapter', () => {
     if (removed.success) expect(removed.document.source).toBe(plain)
   })
 
-  it('appends an overriding color directive for a referenced-only node', () => {
+  it('updates the style directive for a referenced-only node', () => {
     const inline = 'flowchart TD\n  A --> B\n  style B fill:#112233\n'
     const parsed = flowchartCompatibilityAdapter.parse(inline, 1)
-    expect(parsed.model.ambiguousNodeIds.has('B')).toBe(true)
+    expect(parsed.model.ambiguousNodeIds.has('B')).toBe(false)
     const result = applySourceOperations(
       parsed.concrete,
       issueFlowchartOperation(parsed, { kind: 'update-node-colors', id: 'B', fillColor: '#abcdef' }),
       (candidate, revision) => ({ valid: true, concrete: flowchartCompatibilityAdapter.parse(candidate, revision).concrete }),
     )
     expect(result).toMatchObject({ success: true })
-    if (result.success) expect(result.document.source).toBe('flowchart TD\n  A --> B\n  style B fill:#112233\n  style B fill:#abcdef')
+    if (result.success) expect(result.document.source).toBe('flowchart TD\n  A --> B\n  style B fill:#abcdef\n')
   })
 
   it('deletes a node together with its owned color directive', () => {
@@ -292,6 +324,31 @@ describe('flowchartCompatibilityAdapter', () => {
     }
   })
 
+  it('preserves inline endpoint declarations when changing an edge style', () => {
+    const inline = [
+      'flowchart TD',
+      '  User([User]) --> Web[Web App]',
+      '  Web -->|API request| Service[Application Service]',
+      '  Service --> Database[(Database)]',
+      '',
+    ].join('\n')
+    const parsed = flowchartCompatibilityAdapter.parse(inline, 1)
+    const edge = parsed.model.edges.find(candidate => candidate.source === 'Service' && candidate.target === 'Database')
+
+    expect(edge).toBeDefined()
+    const result = applySourceOperations(
+      parsed.concrete,
+      issueFlowchartOperation(parsed, { kind: 'update-edge', id: edge!.id, style: 'thick' }),
+      (candidate, revision) => ({ valid: true, concrete: flowchartCompatibilityAdapter.parse(candidate, revision).concrete }),
+    )
+
+    expect(result).toMatchObject({ success: true })
+    if (!result.success) return
+    expect(result.document.source).toContain('Service ' + edge!.id + '@==> Database[(Database)]')
+    expect(initializeAdapterProjection('flowchart', result.document.source, result.document.revision).diagnostics)
+      .not.toContainEqual(expect.objectContaining({ code: 'code-preview-fallback' }))
+  })
+
   it('changes only shape delimiters around a stable node label', () => {
     const parsed = flowchartCompatibilityAdapter.parse(source, 1)
     const result = apply(issueFlowchartOperation(parsed, { kind: 'update-node-shape', id: 'A', shape: 'diamond' }))
@@ -308,6 +365,23 @@ describe('flowchartCompatibilityAdapter', () => {
     const deleted = apply(issueFlowchartOperation(parsed, { kind: 'delete-edge', id: 'e2' }))
     expect(deleted.success).toBe(true)
     if (deleted.success) expect(deleted.document.source.match(/  A --> B/g)).toHaveLength(1)
+  })
+
+  it('preserves an inline-only endpoint declaration when deleting its edge', () => {
+    const source = 'flowchart TD\n  Service[Application Service]\n  Service e3@==> Database[(Database)]\n'
+    const parsed = flowchartCompatibilityAdapter.parse(source, 1)
+
+    const result = applySourceOperations(
+      parsed.concrete,
+      issueFlowchartOperation(parsed, { kind: 'delete-edge', id: 'e3' }),
+      (candidate, revision) => ({ valid: true, concrete: flowchartCompatibilityAdapter.parse(candidate, revision).concrete }),
+    )
+
+    expect(result).toMatchObject({ success: true })
+    if (!result.success) return
+    expect(result.document.source).toBe('flowchart TD\n  Service[Application Service]\n  Database[(Database)]\n')
+    expect(flowchartCompatibilityAdapter.parse(result.document.source, 2).model.nodes)
+      .toEqual(expect.arrayContaining([expect.objectContaining({ id: 'Database', data: expect.objectContaining({ shape: 'cylinder' }) })]))
   })
 
   it('reports ambiguous repeated node declarations instead of editing an arbitrary range', () => {

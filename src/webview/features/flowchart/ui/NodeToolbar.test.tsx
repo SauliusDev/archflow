@@ -93,6 +93,16 @@ describe('NodeToolbar', () => {
     expect(scratchpadButton.textContent).toBe('')
   })
 
+  it('removes a clicked toolbar tooltip until the pointer leaves its button', () => {
+    render(<NodeToolbar {...defaultProps} />)
+    const button = screen.getByRole('button', { name: 'Duplicate node' })
+
+    fireEvent.pointerDown(button)
+    expect(button.getAttribute('title')).toBeNull()
+    fireEvent.pointerLeave(button)
+    expect(button.getAttribute('title')).toBe('Duplicate')
+  })
+
   it('clicking Delete button calls removeNodes with nodeId', () => {
     render(<NodeToolbar {...defaultProps} />)
     fireEvent.click(screen.getByRole('button', { name: 'Delete node' }))

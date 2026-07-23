@@ -50,7 +50,7 @@ body {
 :root[data-theme="light"] .canvas-container--modern .react-flow,
 :root[data-theme="vscode-adaptive"] body.vscode-light .canvas-container--modern .react-flow,
 :root[data-theme="vscode-adaptive"] body.vscode-high-contrast-light .canvas-container--modern .react-flow {
-  background: #fff;
+  background: var(--mv-canvas-bg);
 }
 
 .canvas-container--modern .react-flow,

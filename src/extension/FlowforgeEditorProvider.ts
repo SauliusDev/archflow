@@ -88,9 +88,9 @@ export class FlowforgeEditorProvider implements vscode.CustomTextEditorProvider 
       post,
       autoSave: () => vscode.workspace.getConfiguration('flowforge').get<boolean>('autoSave', true),
       setAutoSave: value => vscode.workspace.getConfiguration('flowforge').update('autoSave', value, vscode.ConfigurationTarget.Global),
-      smartRouting: () => vscode.workspace.getConfiguration('flowforge').get<boolean>('smartRouting', true),
+      smartRouting: () => vscode.workspace.getConfiguration('flowforge').get<boolean>('smartRouting', false),
       setSmartRouting: value => vscode.workspace.getConfiguration('flowforge').update('smartRouting', value, vscode.ConfigurationTarget.Global),
-      snapToGrid: () => vscode.workspace.getConfiguration('flowforge').get<boolean>('snapToGrid', true),
+      snapToGrid: () => vscode.workspace.getConfiguration('flowforge').get<boolean>('snapToGrid', false),
       setSnapToGrid: value => vscode.workspace.getConfiguration('flowforge').update('snapToGrid', value, vscode.ConfigurationTarget.Global),
       newEdgeRouteMode: () => this.globalNewEdgeRouteMode(),
       setNewEdgeRouteMode: value => this.setGlobalNewEdgeRouteMode(value),
@@ -285,7 +285,7 @@ export class FlowforgeEditorProvider implements vscode.CustomTextEditorProvider 
     const configuration = vscode.workspace.getConfiguration('flowforge')
     const inspect = (configuration as Partial<Pick<vscode.WorkspaceConfiguration, 'inspect'>>).inspect
     const globalValue = inspect?.call(configuration, 'layoutStyle')?.globalValue
-    return globalValue === 'modern' ? 'modern' : 'classic'
+    return globalValue === 'classic' ? 'classic' : 'modern'
   }
 
   private setGlobalLayoutStyle(value: LayoutStyle): Promise<void> {

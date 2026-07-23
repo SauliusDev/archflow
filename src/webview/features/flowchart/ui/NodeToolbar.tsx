@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NodeToolbar as RFNodeToolbar, Position, useViewport } from '@xyflow/react'
 import { useStore } from '@/state/createStore'
 import { useShallow } from 'zustand/react/shallow'
@@ -17,6 +17,7 @@ interface NodeToolbarProps {
 }
 
 export default function NodeToolbar({ isVisible, nodeId, positionAbsoluteY }: NodeToolbarProps): React.JSX.Element {
+  const [clickedTooltip, setClickedTooltip] = useState<string | null>(null)
   const { zoom, y: viewportY } = useViewport()
   const screenY = positionAbsoluteY * zoom + viewportY
   const toolbarPosition = screenY < 100 ? Position.Bottom : Position.Top
@@ -39,13 +40,21 @@ export default function NodeToolbar({ isVisible, nodeId, positionAbsoluteY }: No
     useStore.getState().announce(`${scratchpadShape.label} added to Scratchpad`)
   }
 
+  function tooltipProps(label: string): { title?: string; onPointerDown: () => void; onPointerLeave: () => void } {
+    return {
+      title: clickedTooltip === label ? undefined : label,
+      onPointerDown: () => setClickedTooltip(label),
+      onPointerLeave: () => setClickedTooltip(null),
+    }
+  }
+
   return (
     <RFNodeToolbar isVisible={isVisible} position={toolbarPosition} offset={44}>
       <div className="node-toolbar">
         <button
           className="node-toolbar__btn"
           aria-label="Add to scratchpad"
-          title="Add to scratchpad"
+          {...tooltipProps('Add to scratchpad')}
           disabled={!scratchpadShape || isCanvasLocked}
           onClick={handleAddToScratchpad}
         >
@@ -55,14 +64,14 @@ export default function NodeToolbar({ isVisible, nodeId, positionAbsoluteY }: No
         <button
           className="node-toolbar__btn"
           aria-label="Duplicate node"
-          title="Duplicate"
+          {...tooltipProps('Duplicate')}
           onClick={() => duplicateNode(nodeId)}
         >⧉</button>
 
         <button
           className={`node-toolbar__btn${isNodeLocked ? ' node-toolbar__btn--active' : ''}`}
           aria-label={isNodeLocked ? 'Unlock node' : 'Lock node'}
-          title={isNodeLocked ? 'Unlock' : 'Lock'}
+          {...tooltipProps(isNodeLocked ? 'Unlock' : 'Lock')}
           onClick={() => toggleNodeLock(nodeId)}
         >{isNodeLocked ? '⊠' : '⊟'}</button>
 
@@ -71,7 +80,7 @@ export default function NodeToolbar({ isVisible, nodeId, positionAbsoluteY }: No
         <button
           className="node-toolbar__btn node-toolbar__btn--danger"
           aria-label="Delete node"
-          title="Delete"
+          {...tooltipProps('Delete')}
           onClick={() => removeNodes([nodeId])}
         >✕</button>
       </div>

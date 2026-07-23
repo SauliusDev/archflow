@@ -79,6 +79,23 @@ describe('useStore', () => {
       expect(useStore.getState().documentSession?.history.past).toHaveLength(1)
     })
 
+    it('keeps edge deletion as the next undo after save serialization', () => {
+      const source = 'flowchart TD\n  Service[Application Service]\n  Service e3@--> Database[(Database)]\n'
+      const projection = flowchartCompatibilityAdapter.parse(source, 1)
+      useStore.getState().initializeDocumentSession(createDocumentSession('save-does-not-undo', 1, projection, layout))
+      useStore.getState().importFromCode(projection.model)
+
+      useStore.getState().removeEdge('e3')
+      const deleted = useStore.getState().documentSession!
+      const content = embedLayoutInMermaid(deleted.source, deleted.layout)
+      useStore.getState().prepareDocumentSave(content, deleted.layout)
+
+      expect(useStore.getState().documentSession?.history.past).toHaveLength(1)
+      useStore.getState().undo()
+      expect(useStore.getState().codeSource).toContain('Database[(Database)]')
+      expect(useStore.getState().edges).toEqual(expect.arrayContaining([expect.objectContaining({ id: 'e3' })]))
+    })
+
     it('commits node colors as canonical, reversible source transactions that reopen intact', () => {
       initialize()
       useStore.getState().updateNodeColors('A', { fillColor: '#112233', strokeColor: '#445566', textColor: '#778899' })
@@ -171,20 +188,20 @@ describe('useStore', () => {
 
       const direct = commitFlowchartSemanticOperations(
         useStore.getState().documentSession!,
-        [{ kind: 'update-edge', id: 'e-A-B', label: 'next' }],
+        [{ kind: 'update-edge', id: 'e1', label: 'next' }],
         'diagnostic',
       )
       if (!direct.success) throw new Error(direct.error)
       expect(direct).toMatchObject({ success: true })
 
-      useStore.getState().updateEdgeLabel('e-A-B', 'next')
-      useStore.getState().setEdgeStyle('e-A-B', 'thick')
+      useStore.getState().updateEdgeLabel('e1', 'next')
+      useStore.getState().setEdgeStyle('e1', 'thick')
       useStore.getState().updateNodeShape('A', 'diamond')
 
       expect(useStore.getState().codeSource).toBe(
-        'flowchart LR\r\n  A{Alpha}\r\n  B[Bravo]\r\n  A ==>|next| B\r\n%% untouched\r\n',
+        'flowchart LR\r\n  A{Alpha}\r\n  B[Bravo]\r\n  A e1@==>|next| B\r\n%% untouched\r\n',
       )
-      expect(useStore.getState().documentSession?.history.past).toHaveLength(3)
+      expect(useStore.getState().documentSession?.history.past).toHaveLength(4)
     })
 
     it('creates a connected node and edge as one source transaction with immediate reprojection', () => {
@@ -200,7 +217,7 @@ describe('useStore', () => {
         expect.objectContaining({ source: 'A', target: created?.id }),
       ])
       expect(state.codeSource).toContain(`  ${created?.id}[Node]`)
-      expect(state.codeSource).toContain(`  A --> ${created?.id}`)
+      expect(state.codeSource).toContain(`  A e1@--> ${created?.id}`)
       expect(state.codeSource).toContain('%% untouched')
       expect(state.documentSession?.history.past).toHaveLength(1)
     })
@@ -233,6 +250,28 @@ describe('useStore', () => {
       expect(useStore.getState().documentSession?.projection.diagnostics).toEqual([])
       expect(useStore.getState().nodes[0].data.label).toBe('Recovered')
       expect(useStore.getState().codeSource).toBe('flowchart LR\n  A[Recovered]\n')
+    })
+
+    it('restores the accepted source when Code leaves the canvas on its last valid diagram', () => {
+      initialize()
+      useStore.getState().applyCodeSource('not mermaid')
+
+      useStore.getState().restoreLastValidDiagram()
+
+      expect(useStore.getState().codeSource).toBe(exactSource)
+      expect(useStore.getState().announcement).toMatch(/restored the last valid diagram/i)
+    })
+
+    it('restores the preceding document transaction when the canvas is already unavailable', () => {
+      initialize()
+      useStore.getState().applyCodeSource('flowchart LR\n  A[Alpha]\n  A[Duplicate]\n')
+      expect(useStore.getState().documentSession?.projection.diagnostics).toContainEqual(expect.objectContaining({ code: 'code-preview-fallback' }))
+
+      useStore.getState().restoreLastValidDiagram()
+
+      expect(useStore.getState().documentSession?.projection.diagnostics).toEqual([])
+      expect(useStore.getState().codeSource).toBe(exactSource)
+      expect(useStore.getState().nodes).not.toEqual([])
     })
 
     it('does not create a source transaction while a flowchart canvas is locked', () => {
@@ -360,10 +399,7 @@ describe('useStore', () => {
         ...layout,
         adapterMetadata: { flowchart: { laneOrder: ['Top', 'Nested'] } },
       }))
-      useStore.getState().acceptExternalDocument(projection, {
-        ...layout,
-        adapterMetadata: { flowchart: { laneOrder: ['Top', 'Nested'] } },
-      }, 2, 'lane-classification-load')
+      useStore.getState().importFromCode(projection.model)
 
       expect(useStore.getState().nodes.filter(node => node.data.isLane).map(node => node.id)).toEqual(['Top'])
       expect(useStore.getState().nodes.find(node => node.id === 'Generic')?.data.isLane).toBe(false)
@@ -412,7 +448,7 @@ describe('useStore', () => {
       const projection = flowchartCompatibilityAdapter.parse(source, 1)
       const laneLayout = { ...layout, adapterMetadata: { flowchart: { laneOrder: ['Lane'] } } }
       useStore.getState().initializeDocumentSession(createDocumentSession('lane-move', 1, projection, laneLayout))
-      useStore.getState().acceptExternalDocument(projection, laneLayout, 2, 'lane-move-load')
+      useStore.getState().importFromCode(projection.model)
 
       useStore.getState().assignToSubgraph('A', 'Lane', { x: 20, y: 30 })
       expect(useStore.getState().codeSource).toBe('flowchart TD\n  subgraph Lane [Lane]\n    A[Alpha]\n  end\n  subgraph Generic [Generic]\n    subgraph Nested [Nested]\n    end\n  end\n%% preserve\n')
@@ -487,8 +523,8 @@ describe('useStore', () => {
       const layout: LayoutStateV2 = {
         version: 2, diagramFamily: 'flowchart', viewport: { x: 0, y: 0, zoom: 1 }, elements: {}, constraints: [],
         edges: {
-          'edge:e-A-B': { routeMode: 'straight' },
-          'edge:e-A-B-1': { routeMode: 'curved' },
+          'edge:e1': { routeMode: 'straight' },
+          'edge:e2': { routeMode: 'curved' },
           'edge:e42': { routeMode: 'orthogonal', waypoints: [{ x: 80, y: 40 }] },
           'edge:missing': { routeMode: 'orthogonal', waypoints: [{ x: 1, y: 2 }] },
         },
@@ -499,8 +535,8 @@ describe('useStore', () => {
 
       expect(useStore.getState().codeSource).toBe(source)
       expect(useStore.getState().edges.map(edge => [edge.id, edge.data?.routeMode, edge.data?.waypoints])).toEqual([
-        ['e-A-B', 'straight', undefined],
-        ['e-A-B-1', 'curved', undefined],
+        ['e1', 'straight', undefined],
+        ['e2', 'curved', undefined],
         ['e42', 'orthogonal', [{ x: 80, y: 40 }]],
       ])
     })

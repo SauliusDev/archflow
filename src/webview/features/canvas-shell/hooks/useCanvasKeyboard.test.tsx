@@ -48,6 +48,47 @@ describe('useCanvasKeyboard', () => {
     }
   })
 
+  it('keeps native text shortcuts out of canvas handling based on their event target', () => {
+    useStore.setState({ nodes: [node('a', { selected: true })] })
+    install()
+    const textarea = document.createElement('textarea')
+    document.body.appendChild(textarea)
+    try {
+      for (const key of ['a', 'c', 'v']) {
+        const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key, metaKey: true })
+        textarea.dispatchEvent(event)
+        expect(event.defaultPrevented).toBe(false)
+      }
+
+      expect(useStore.getState().nodes).toHaveLength(1)
+      expect(useStore.getState().nodes[0].selected).toBe(true)
+    } finally {
+      textarea.remove()
+    }
+  })
+
+  it('uses the focused textarea when VS Code retargets a shortcut to the webview body', () => {
+    useStore.setState({ nodes: [node('a')] })
+    install()
+    const textarea = document.createElement('textarea')
+    document.body.appendChild(textarea)
+    textarea.focus()
+    try {
+      const event = new KeyboardEvent('keydown', {
+        bubbles: true,
+        cancelable: true,
+        key: 'a',
+        metaKey: true,
+      })
+      document.body.dispatchEvent(event)
+
+      expect(event.defaultPrevented).toBe(false)
+      expect(useStore.getState().nodes[0].selected).toBeFalsy()
+    } finally {
+      textarea.remove()
+    }
+  })
+
   it('deletes nodes and selected edges, then clears pending connects', () => {
     const edge = { id: 'edge', source: 'a', target: 'b', selected: true }
     useStore.setState({ nodes: [node('a', { selected: true }), node('b')], edges: [edge], pendingConnect: { sourceId: 'a' } })

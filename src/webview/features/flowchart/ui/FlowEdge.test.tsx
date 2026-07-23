@@ -204,7 +204,7 @@ describe('FlowEdge', () => {
     fireEvent.pointerDown(endpoint)
     expect(setPendingConnect).toHaveBeenCalledWith(expect.objectContaining({
       kind: 'reassign', edgeId: 'e-A-B', endpoint: 'source', fixedNodeId: 'B',
-      cursor: expect.any(Object), awaitingInitialRelease: true,
+      cursor: expect.any(Object),
     }))
   })
 

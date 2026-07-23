@@ -103,6 +103,104 @@ function layoutValuesEqual(left: unknown, right: unknown): boolean {
     && leftKeys.every(key => Object.prototype.hasOwnProperty.call(rightRecord, key) && layoutValuesEqual(leftRecord[key], rightRecord[key]))
 }
 
+function edgeSignature(edge: Edge): string {
+  return JSON.stringify([
+    edge.source,
+    edge.target,
+    edge.data?.label,
+    edge.data?.style,
+    edge.data?.connector,
+  ])
+}
+
+/**
+ * Mermaid only stores an edge id when it is explicit. The parser therefore
+ * gives ordinary edges sequential ids, which shift when an earlier edge is
+ * deleted. Carry layout data across by the surviving source-order edge rather
+ * than allowing it to attach to the newly renumbered edge.
+ */
+function reconcileFlowchartLayoutAfterSourceEdit(before: DocumentSession, after: DocumentSession): DocumentSession {
+  const previous = before.projection.model as FlowchartAdapterModel
+  const next = after.projection.model as FlowchartAdapterModel
+  const previousEdges = previous.edges
+  const nextEdges = next.edges
+  const mappedPreviousIds = new Map<string, string>()
+  const usedPrevious = new Set<string>()
+
+  for (const edge of nextEdges) {
+    const candidate = previousEdges.find(previousEdge => previousEdge.id === edge.id && edgeSignature(previousEdge) === edgeSignature(edge))
+    if (candidate) {
+      mappedPreviousIds.set(edge.id, candidate.id)
+      usedPrevious.add(candidate.id)
+    }
+  }
+
+  const remainingPrevious = previousEdges.filter(edge => !usedPrevious.has(edge.id))
+  const remainingNext = nextEdges.filter(edge => !mappedPreviousIds.has(edge.id))
+  let previousIndex = 0
+  for (const edge of remainingNext) {
+    const signature = edgeSignature(edge)
+    const matchIndex = remainingPrevious.findIndex((candidate, index) => index >= previousIndex && edgeSignature(candidate) === signature)
+    if (matchIndex === -1) continue
+    const candidate = remainingPrevious[matchIndex]
+    mappedPreviousIds.set(edge.id, candidate.id)
+    previousIndex = matchIndex + 1
+  }
+
+  const nodeIds = new Set(next.nodes.map(node => node.id))
+  const edgeIds = new Set(nextEdges.map(edge => edge.id))
+  const knownPreviousEdgeIds = new Set(previousEdges.map(edge => edge.id))
+  const preservedUnknownRoutes = Object.entries(after.layout.edges)
+    .filter(([handle]) => !handle.startsWith('edge:') || !knownPreviousEdgeIds.has(handle.slice('edge:'.length)))
+  const reconciledRoutes = nextEdges.flatMap(edge => {
+    const previousId = mappedPreviousIds.get(edge.id)
+    // A newly added edge or an updated edge made explicit by Canvas may already
+    // have layout supplied by this command. A reused generated id, however,
+    // must only inherit layout through a verified surviving-edge match.
+    const route = previousId
+      ? after.layout.edges[`edge:${previousId}`]
+      : (!previousEdges.some(candidate => candidate.id === edge.id) || edge.data?.explicitId === edge.id)
+          ? after.layout.edges[`edge:${edge.id}`]
+          : undefined
+    return route ? [[`edge:${edge.id}`, route]] : []
+  })
+  const edges = Object.fromEntries([...preservedUnknownRoutes, ...reconciledRoutes])
+  const validHandles = new Set([
+    ...[...nodeIds].map(id => `node:${id}`),
+    ...[...edgeIds].map(id => `edge:${id}`),
+  ])
+  const selection = after.selection.flatMap(handle => {
+    if (!handle.startsWith('edge:')) return validHandles.has(handle) ? [handle] : []
+    const previousId = handle.slice('edge:'.length)
+    const mapped = nextEdges.find(edge => mappedPreviousIds.get(edge.id) === previousId)
+    if (mapped) return [`edge:${mapped.id}` as SemanticHandle]
+    const explicit = nextEdges.find(edge => edge.id === previousId && edge.data?.explicitId === edge.id)
+    return explicit ? [`edge:${explicit.id}` as SemanticHandle] : []
+  })
+  const layout = {
+    ...after.layout,
+    // Removing an inline-only node declaration must also remove its stale
+    // geometry; otherwise the next embedded layout can make it look as if
+    // the deleted node still belongs to the document.
+    elements: Object.fromEntries(
+      Object.entries(after.layout.elements).filter(([handle]) =>
+        !handle.startsWith('node:') || nodeIds.has(handle.slice('node:'.length)),
+      ),
+    ),
+    edges,
+    constraints: after.layout.constraints.filter(constraint => constraint.handles.every(handle => validHandles.has(handle))),
+  }
+  const lastTransaction = after.history.past.at(-1)
+  return {
+    ...after,
+    layout,
+    selection,
+    history: lastTransaction
+      ? { ...after.history, past: [...after.history.past.slice(0, -1), { ...lastTransaction, layoutAfter: layout, selectionAfter: selection }] }
+      : after.history,
+  }
+}
+
 function semanticPlanningFailure(error: unknown): CommandResult<never> {
   return error instanceof SemanticValidationError ? invalidOperationFailure(error) : failure(error)
 }
@@ -181,7 +279,7 @@ export function executeFlowchartCommand(
       layout: request.layout,
     }, (source, revision) => flowchartCompatibilityAdapter.parse(source, revision))
     return committed.success
-      ? { ok: true, value: committed.session }
+      ? { ok: true, value: reconcileFlowchartLayoutAfterSourceEdit(session, committed.session) }
       : { ok: false, code: /stale|revision/i.test(committed.error) ? 'stale-transaction' : 'invalid-source', message: committed.error }
   } catch (error) {
     return failure(error)

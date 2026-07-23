@@ -1,3 +1,3 @@
-import flowforgeLogoUrl from './flowforge-logo.png?inline'
+import flowforgeIconUrl from '../../../assets/icon.png?inline'
 
-export const logoDataUri = flowforgeLogoUrl
+export const logoDataUri = flowforgeIconUrl

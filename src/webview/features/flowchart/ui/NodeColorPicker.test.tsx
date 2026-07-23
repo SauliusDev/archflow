@@ -90,28 +90,28 @@ describe('NodeColorPicker', () => {
 
   it('clicking a border swatch calls updateNodeColors with correct strokeColor', () => {
     render(<NodeColorPicker {...defaultProps} />)
-    const borderSwatch = screen.getByRole('button', { name: 'Border color #3a3c3e' })
+    const borderSwatch = screen.getByRole('button', { name: 'Border color #1e2022' })
     fireEvent.click(borderSwatch)
     expect(mockUpdateNodeColors).toHaveBeenCalledWith(TEST_NODE_ID, {
       fillColor: undefined,
-      strokeColor: '#3a3c3e',
+      strokeColor: '#1e2022',
       textColor: undefined,
     })
   })
 
   it('clicking a text swatch calls updateNodeColors with correct textColor', () => {
     render(<NodeColorPicker {...defaultProps} />)
-    const textSwatch = screen.getByRole('button', { name: 'Text color #bfbfbf' })
+    const textSwatch = screen.getByRole('button', { name: 'Text color #1e2022' })
     fireEvent.click(textSwatch)
     expect(mockUpdateNodeColors).toHaveBeenCalledWith(TEST_NODE_ID, {
       fillColor: undefined,
       strokeColor: undefined,
-      textColor: '#bfbfbf',
+      textColor: '#1e2022',
     })
   })
 
   it('clicking reset calls updateNodeColors with all undefined values', () => {
-    render(<NodeColorPicker {...defaultProps} fillColor="#1e2022" strokeColor="#3a3c3e" textColor="#bfbfbf" />)
+    render(<NodeColorPicker {...defaultProps} fillColor="#1e2022" strokeColor="#1e2022" textColor="#1e2022" />)
     fireEvent.click(screen.getByRole('button', { name: 'Reset node colors to default' }))
     expect(mockUpdateNodeColors).toHaveBeenCalledWith(TEST_NODE_ID, {
       fillColor: undefined,
@@ -127,14 +127,14 @@ describe('NodeColorPicker', () => {
   })
 
   it('selected stroke swatch gets active class when strokeColor matches', () => {
-    render(<NodeColorPicker {...defaultProps} strokeColor="#3a3c3e" />)
-    const activeSwatch = screen.getByRole('button', { name: 'Border color #3a3c3e' })
+    render(<NodeColorPicker {...defaultProps} strokeColor="#1e2022" />)
+    const activeSwatch = screen.getByRole('button', { name: 'Border color #1e2022' })
     expect(activeSwatch.className).toContain('node-color-picker__swatch--active')
   })
 
   it('selected text swatch gets active class when textColor matches', () => {
-    render(<NodeColorPicker {...defaultProps} textColor="#bfbfbf" />)
-    const activeSwatch = screen.getByRole('button', { name: 'Text color #bfbfbf' })
+    render(<NodeColorPicker {...defaultProps} textColor="#1e2022" />)
+    const activeSwatch = screen.getByRole('button', { name: 'Text color #1e2022' })
     expect(activeSwatch.className).toContain('node-color-picker__swatch--active')
   })
 

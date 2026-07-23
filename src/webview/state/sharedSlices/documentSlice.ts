@@ -41,11 +41,15 @@ export const createDocumentSlice: StateCreator<
   documentSession: null,
   codeSource: "",
   classDiagram: null,
+  recoverySnapshot: null,
   initializeDocumentSession: (documentSession) =>
     set({
       documentSession,
       codeSource: documentSession.source,
       classDiagram: classDiagramModel(documentSession),
+      recoverySnapshot: hasFlowchartCanvasProjection(documentSession)
+        ? { session: documentSession, nodes: [], edges: [] }
+        : null,
     }),
   setInspectorVisible: (visible) => {
     const current = get();
@@ -111,6 +115,7 @@ export const createDocumentSlice: StateCreator<
         classDiagram: null,
         ...projected,
         isDirty: committed.session.dirty,
+        recoverySnapshot: { session: committed.session, nodes: projected.nodes, edges: projected.edges },
       });
       return;
     }
@@ -135,6 +140,58 @@ export const createDocumentSlice: StateCreator<
       isDirty: committed.session.dirty,
       announcement: fallback?.message ?? "Canvas source updated",
     });
+  },
+  restoreLastValidDiagram: () => {
+    const { documentSession: session, recoverySnapshot } = get();
+    if (!session) return;
+    if (recoverySnapshot) {
+      const projected = hasFlowchartCanvasProjection(recoverySnapshot.session)
+        ? projectSessionModel(recoverySnapshot.session, get().nodes)
+        : { nodes: recoverySnapshot.nodes, edges: recoverySnapshot.edges };
+      set({
+        documentSession: recoverySnapshot.session,
+        codeSource: recoverySnapshot.session.source,
+        classDiagram: classDiagramModel(recoverySnapshot.session),
+        ...projected,
+        isDirty: recoverySnapshot.session.dirty,
+        announcement: "Restored the last valid diagram.",
+      });
+      return;
+    }
+    const fallback = session.projection.diagnostics.some(diagnostic => diagnostic.code === "code-preview-fallback");
+    const transaction = session.history.past.at(-1);
+    // A fallback projection intentionally has no concrete handles, so normal
+    // undo cannot apply its inverse. Rebuild the preceding document directly
+    // from the transaction's whole-source inverse instead.
+    const inverse = transaction?.inverse.find(operation => operation.kind === "replace" && operation.range.start === 0);
+    if (fallback && transaction && inverse?.kind === "replace") {
+      const projection = initializeAdapterProjection(session.family, inverse.text, session.workingRevision + 1);
+      if (!projection.diagnostics.some(diagnostic => diagnostic.code === "code-preview-fallback")) {
+        const recovered = {
+          ...session,
+          workingRevision: session.workingRevision + 1,
+          source: inverse.text,
+          projection,
+          layout: transaction.layoutBefore,
+          selection: [...transaction.selectionBefore],
+          dirty: inverse.text !== session.baseSource || JSON.stringify(transaction.layoutBefore) !== JSON.stringify(session.baseLayout),
+          history: { past: session.history.past.slice(0, -1), future: [...session.history.future, transaction] },
+        };
+        const projected = hasFlowchartCanvasProjection(recovered)
+          ? projectSessionModel(recovered, get().nodes)
+          : { nodes: get().nodes, edges: get().edges };
+        set({
+          documentSession: recovered,
+          codeSource: recovered.source,
+          classDiagram: classDiagramModel(recovered),
+          ...projected,
+          isDirty: recovered.dirty,
+          announcement: "Restored the last valid diagram.",
+        });
+        return;
+      }
+    }
+    set({ codeSource: session.source, announcement: "Restored the last valid diagram." });
   },
   prepareDocumentSave: (content, layout) => {
     const session = get().documentSession;
@@ -163,17 +220,42 @@ export const createDocumentSlice: StateCreator<
         initializeAdapterProjection(session.family, candidate, revision),
     );
     if (!committed.success) return null;
+    // Persisting the embedded layout advances the working document, but is not
+    // a user edit. Keeping its transaction in history made Ctrl+Z undo save
+    // serialization before it could undo the preceding canvas action.
+    const persisted = { ...committed.session, history: session.history };
     set({
-      documentSession: committed.session,
-      codeSource: committed.session.source,
-      classDiagram: classDiagramModel(committed.session),
-      isDirty: committed.session.dirty,
+      documentSession: persisted,
+      codeSource: persisted.source,
+      classDiagram: classDiagramModel(persisted),
+      isDirty: persisted.dirty,
     });
-    return committed.session;
+    return persisted;
   },
   acceptExternalDocument: (projection, layout, hostRevision, eventId) => {
     const current = get();
     if (!current.documentSession) return;
+    // VS Code can echo our own completed write through its document watcher
+    // before SAVE_RESULT reaches the webview. The source is already identical,
+    // so acknowledge its newer host revision instead of creating a false
+    // conflict that disables undo.
+    if (projection.concrete.source === current.documentSession.source) {
+      const session = acknowledgeSave(current.documentSession, {
+        eventId,
+        sessionId: current.documentSession.sessionId,
+        transactionId: eventId,
+        workingRevision: current.documentSession.workingRevision,
+        hostRevision,
+      });
+      if (session === current.documentSession) return;
+      set({
+        documentSession: session,
+        codeSource: session.source,
+        isDirty: session.dirty,
+        announcement: "Local save acknowledged",
+      });
+      return;
+    }
     const session = acceptExternalRevision(
       current.documentSession,
       hostRevision,
@@ -201,6 +283,9 @@ export const createDocumentSlice: StateCreator<
       ...projected,
       isDirty: false,
       announcement: "External changes adopted",
+      ...(hasFlowchartCanvasProjection(session)
+        ? { recoverySnapshot: { session, nodes: projected.nodes, edges: projected.edges } }
+        : {}),
     });
   },
   acknowledgeDocumentSave: (acknowledgement) => {

@@ -2,13 +2,13 @@
   "name": "flowforge",
   "displayName": "FlowForge",
   "publisher": "sauliusd3v",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Mermaid diagram visual editor for VS Code",
   "repository": {
     "type": "git",
     "url": "https://github.com/SauliusDev/flowforge.git"
   },
-  "icon": "assets/logo.png",
+  "icon": "assets/icon.png",
   "main": "./out/extension.js",
   "engines": {
     "vscode": "^1.80.0"
@@ -58,12 +58,12 @@
         },
         "flowforge.smartRouting": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Automatically route flowchart edges around nodes and existing edges when a clear path is available."
         },
         "flowforge.snapToGrid": {
           "type": "boolean",
-          "default": true,
+          "default": false,
           "description": "Align flowchart nodes and palette drops to the canvas grid. Disable for free placement."
         },
         "flowforge.newEdgeRouteMode": {
@@ -76,7 +76,7 @@
         "flowforge.layoutStyle": {
           "type": "string",
           "enum": ["classic", "modern"],
-          "default": "classic",
+          "default": "modern",
           "scope": "application",
           "description": "Choose the Flowforge editor chrome and panel layout style."
         },

@@ -87,9 +87,43 @@ describe('createFlowchartSlice shape geometry', () => {
       height: 80,
     })
   })
+
+  it('projects a generalized node shape change back into the canvas', () => {
+    const source = 'flowchart TD\n  n1@{ shape: diamond, label: "Draft" }\n'
+    const projection = flowchartCompatibilityAdapter.parse(source, 1)
+    const layout: LayoutStateV2 = {
+      version: 2, diagramFamily: 'flowchart', viewport: { x: 0, y: 0, zoom: 1 },
+      elements: {}, edges: {}, constraints: [],
+    }
+    useStore.getState().initializeDocumentSession(createDocumentSession('generalized-shape', 1, projection, layout))
+    useStore.getState().importFromCode(projection.model)
+
+    useStore.getState().updateNodeShape('n1', 'cylinder')
+
+    expect(useStore.getState().codeSource).toContain('shape: cyl')
+    expect(useStore.getState().nodes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'n1', data: expect.objectContaining({ shape: 'cylinder', mermaidShape: 'cyl' }) }),
+    ]))
+  })
 })
 
 describe('createFlowchartSlice edge defaults', () => {
+  it('keeps the explicitly dropped target side when auto-reassign is disabled', () => {
+    const source = 'flowchart LR\n  A[Source]\n  B[Web App]\n'
+    const projection = flowchartCompatibilityAdapter.parse(source, 1)
+    useStore.getState().initializeDocumentSession(createDocumentSession('explicit-target-side', 1, projection, {
+      version: 2, diagramFamily: 'flowchart', viewport: { x: 0, y: 0, zoom: 1 },
+      elements: {}, edges: {}, constraints: [],
+      adapterMetadata: { flowchart: { nodeConnections: { mode: 'side', autoReassign: false } } },
+    }))
+    useStore.getState().importFromCode(projection.model)
+
+    useStore.getState().addEdge({ source: 'A', target: 'B', targetSide: 'right' })
+
+    expect(useStore.getState().documentSession?.layout.edges['edge:e1']).toMatchObject({ targetSide: 'right' })
+    expect(useStore.getState().edges.find(edge => edge.id === 'e1')?.data?.targetSide).toBe('right')
+  })
+
   it('retargets just the selected endpoint while preserving the edge route and other attachment', () => {
     useStore.setState({
       nodes: [],
@@ -106,6 +140,23 @@ describe('createFlowchartSlice edge defaults', () => {
       data: { style: 'arrow', routeMode: 'curved', sourceSide: 'bottom', targetSide: 'left' },
     })
     expect(useStore.getState().history.past).toHaveLength(1)
+  })
+
+  it('updates the side when an endpoint is dropped back onto its current node', () => {
+    const source = 'flowchart LR\n  A[Alpha]\n  B[Beta]\n  A e1@--> B\n'
+    const projection = flowchartCompatibilityAdapter.parse(source, 1)
+    useStore.getState().initializeDocumentSession(createDocumentSession('same-node-side', 1, projection, {
+      version: 2, diagramFamily: 'flowchart', viewport: { x: 0, y: 0, zoom: 1 },
+      elements: {}, edges: { 'edge:e1': { routeMode: 'curved', sourceSide: 'right', targetSide: 'bottom' } }, constraints: [],
+    }))
+    useStore.getState().importFromCode(projection.model)
+
+    useStore.getState().retargetEdgeEndpoint('e1', 'target', 'B', 'left')
+
+    expect(useStore.getState().documentSession?.layout.edges['edge:e1']).toEqual({
+      routeMode: 'curved', sourceSide: 'right', targetSide: 'left',
+    })
+    expect(useStore.getState().edges.find(edge => edge.id === 'e1')?.data?.targetSide).toBe('left')
   })
 
   it('creates direct and spawned legacy edges with the requested route mode', () => {
@@ -189,7 +240,7 @@ describe('createFlowchartSlice edge defaults', () => {
 
     useStore.getState().addEdge({ source: 'A', target: 'B-C' })
 
-    expect(useStore.getState().documentSession?.layout.edges).toEqual({
+    expect(useStore.getState().documentSession?.layout.edges).toMatchObject({
       'edge:e-A-B-C': { routeMode: 'straight' },
       'edge:e2': { routeMode: 'curved' },
     })

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useId, useRef } from 'react'
 import type { FlowchartNodeConnections } from '../../../../shared/diagram-contracts'
 import type { LayoutStyle, NewEdgeRouteMode } from '../../../../shared/protocol'
 
@@ -21,11 +21,13 @@ interface SettingsDialogProps {
 }
 
 const ROUTE_MODES: readonly NewEdgeRouteMode[] = ['straight', 'orthogonal', 'curved']
+const DEFAULT_NODE_CONNECTIONS: FlowchartNodeConnections = { mode: 'side', autoReassign: true }
 
 export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smartRouting, onSmartRoutingChange, snapToGrid, onSnapToGridChange, newEdgeRouteMode, onNewEdgeRouteModeChange, layoutStyle, onLayoutStyleChange, nodeConnections, onNodeConnectionsChange, onClose, returnFocusRef }: SettingsDialogProps): React.JSX.Element | null {
   const autoSaveRef = useRef<HTMLInputElement>(null)
   const smartRoutingRef = useRef<HTMLInputElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
+  const connectionModeName = `node-connection-mode-${useId()}`
   const close = useCallback((): void => {
     onClose()
     returnFocusRef.current?.focus()
@@ -41,7 +43,7 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
         return
       }
       if (event.key !== 'Tab') return
-      const focusable = Array.from(document.querySelectorAll<HTMLElement>('.settings-dialog button:not(:disabled), .settings-dialog select:not(:disabled), .settings-dialog input:not(:disabled):not([type="radio"]), .settings-dialog input[type="radio"]:checked:not(:disabled)'))
+      const focusable = Array.from(document.querySelectorAll<HTMLElement>('.settings-dialog button:not(:disabled), .settings-dialog a[href], .settings-dialog select:not(:disabled), .settings-dialog input:not(:disabled):not([type="radio"]), .settings-dialog input[type="radio"]:checked:not(:disabled)'))
       const currentIndex = focusable.indexOf(document.activeElement as HTMLElement)
       if (currentIndex === -1) return
       event.preventDefault()
@@ -55,6 +57,14 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
   if (!open) return null
   const connectionPolicy = nodeConnections
   const updateConnectionPolicy = onNodeConnectionsChange
+  const resetToDefaults = (): void => {
+    onAutoSaveChange(true)
+    onSmartRoutingChange(false)
+    onSnapToGridChange(false)
+    onNewEdgeRouteModeChange('curved')
+    onLayoutStyleChange('modern')
+    updateConnectionPolicy(DEFAULT_NODE_CONNECTIONS)
+  }
 
   return (
     <div
@@ -69,7 +79,8 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
           <button ref={closeRef} className="settings-dialog__close" type="button" aria-label="Close settings" onClick={close}>×</button>
         </div>
         <div className="settings-dialog__body">
-          <label className="settings-dialog__preference">
+          <div className="settings-dialog__quick-settings" role="group" aria-label="General settings">
+            <label className="settings-dialog__preference">
             <span>
               <strong>Auto save</strong>
               <small id="settings-dialog-auto-save-description">Automatically save after editing stops.</small>
@@ -85,8 +96,8 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
               />
               <span aria-hidden="true" />
             </span>
-          </label>
-          <label className="settings-dialog__preference">
+            </label>
+            <label className="settings-dialog__preference">
             <span>
               <strong>Smart routing</strong>
               <small id="settings-dialog-smart-routing-description">Automatically avoid nodes and existing edges in flowcharts.</small>
@@ -102,8 +113,8 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
               />
               <span aria-hidden="true" />
             </span>
-          </label>
-          <label className="settings-dialog__preference">
+            </label>
+            <label className="settings-dialog__preference">
             <span>
               <strong>Snap to grid</strong>
               <small id="settings-dialog-snap-to-grid-description">Align new and moved items to the canvas grid.</small>
@@ -118,8 +129,8 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
               />
               <span aria-hidden="true" />
             </span>
-          </label>
-          <label className="settings-dialog__preference">
+            </label>
+            <label className="settings-dialog__preference">
             <span>
               <strong>Layout style</strong>
               <small id="settings-dialog-layout-style-description">Choose the current editor chrome or a rounded modern layout.</small>
@@ -128,7 +139,8 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
               <option value="classic">Classic</option>
               <option value="modern">Modern</option>
             </select>
-          </label>
+            </label>
+          </div>
           <fieldset className="settings-dialog__route-default">
             <legend>Default connector path</legend>
             <small id="settings-dialog-new-edge-route-description">Choose how new flowchart connections are drawn.</small>
@@ -156,11 +168,11 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
             <small id="settings-dialog-node-connections-description">Choose free border attachments or explicit cardinal node sides.</small>
             <div role="radiogroup" aria-label="Node connections" aria-describedby="settings-dialog-node-connections-description">
               <label className={`settings-dialog__connection-option${connectionPolicy.mode === 'free' ? ' settings-dialog__connection-option--selected' : ''}`}>
-                <input type="radio" name="node-connection-mode" aria-label="Free node connections" checked={connectionPolicy.mode === 'free'} onChange={() => updateConnectionPolicy({ mode: 'free', autoReassign: false })} />
+                <input type="radio" name={connectionModeName} aria-label="Free node connections" checked={connectionPolicy.mode === 'free'} onChange={() => updateConnectionPolicy({ mode: 'free', autoReassign: false })} />
                 <span>Free</span>
               </label>
               <label className={`settings-dialog__connection-option${connectionPolicy.mode === 'side' ? ' settings-dialog__connection-option--selected' : ''}`}>
-                <input type="radio" name="node-connection-mode" aria-label="Side node connections" checked={connectionPolicy.mode === 'side'} onChange={() => updateConnectionPolicy({ mode: 'side', autoReassign: false })} />
+                <input type="radio" name={connectionModeName} aria-label="Side node connections" checked={connectionPolicy.mode === 'side'} onChange={() => updateConnectionPolicy({ mode: 'side', autoReassign: false })} />
                 <span>Side</span>
               </label>
             </div>
@@ -175,6 +187,26 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
               </span>
             </label>
           </fieldset>
+          <div className="settings-dialog__actions">
+            <button type="button" className="settings-dialog__reset" onClick={resetToDefaults}>Reset to defaults</button>
+          </div>
+          <section className="settings-dialog__about" aria-labelledby="settings-dialog-about-title">
+            <div>
+              <strong id="settings-dialog-about-title">About FlowForge</strong>
+              <small>View the project source code, releases, and documentation on GitHub.</small>
+            </div>
+            <a
+              className="settings-dialog__github-link"
+              href="https://github.com/SauliusDev/flowforge"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+                <path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.49c-2.23.49-2.7-1.08-2.7-1.08-.36-.93-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.65-.89-3.65-3.96 0-.88.31-1.59.83-2.15-.08-.2-.36-1.02.08-2.12 0 0 .68-.22 2.2.82A7.65 7.65 0 0 1 8 4.8c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.52.56.83 1.27.83 2.15 0 3.08-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.14.46.55.38A8 8 0 0 0 8 0Z" />
+              </svg>
+              <span>View FlowForge on GitHub</span>
+            </a>
+          </section>
         </div>
       </section>
     </div>

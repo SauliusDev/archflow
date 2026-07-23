@@ -64,9 +64,9 @@ describe('bootstrapDocument', () => {
     const savedSource = embedLayoutInMermaid(semanticSource, {
       version: 2, diagramFamily: 'flowchart', viewport: { x: 0, y: 0, zoom: 1 }, elements: {}, constraints: [],
       edges: {
-        'edge:e-A-B': { routeMode: 'straight' },
-        'edge:e-B-C': { routeMode: 'orthogonal', waypoints: [{ x: 32, y: 48 }, { x: 96, y: 48 }] },
-        'edge:e-C-A': { routeMode: 'curved' },
+        'edge:e1': { routeMode: 'straight' },
+        'edge:e2': { routeMode: 'orthogonal', waypoints: [{ x: 32, y: 48 }, { x: 96, y: 48 }] },
+        'edge:e3': { routeMode: 'curved' },
       },
     })
 
@@ -74,10 +74,10 @@ describe('bootstrapDocument', () => {
     const result = bootstrap({ content: savedSource, family: 'flowchart' })
     expect(result.ok).toBe(true)
     if (!result.ok) return
-    const [straight, orthogonal, curved] = ['e-A-B', 'e-B-C', 'e-C-A'].map(id => result.value.edges.find(edge => edge.id === id))
+    const [straight, orthogonal, curved] = ['e1', 'e2', 'e3'].map(id => result.value.edges.find(edge => edge.id === id))
 
     expect(result.value.edges).toHaveLength(3)
-    expect(result.value.edges.map(edge => edge.id).sort()).toEqual(['e-A-B', 'e-B-C', 'e-C-A'])
+    expect(result.value.edges.map(edge => edge.id).sort()).toEqual(['e1', 'e2', 'e3'])
     expect(straight).toMatchObject({ data: { routeMode: 'straight' } })
     expect(straight?.data.waypoints).toBeUndefined()
     expect(orthogonal).toMatchObject({ data: { routeMode: 'orthogonal', waypoints: [{ x: 32, y: 48 }, { x: 96, y: 48 }] } })

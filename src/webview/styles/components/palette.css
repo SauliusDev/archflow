@@ -107,6 +107,43 @@
   user-select: none;
 }
 
+.component-palette__item-wrap {
+  position: relative;
+}
+
+.component-palette__item-wrap .component-palette__item {
+  width: 100%;
+  height: 100%;
+}
+
+.component-palette__remove {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--mv-border);
+  border-radius: 50%;
+  background: var(--mv-glass-bg);
+  color: var(--mv-text-secondary);
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.12s ease, background 0.12s ease, color 0.12s ease;
+}
+
+.component-palette__item-wrap:hover .component-palette__remove,
+.component-palette__item-wrap:focus-within .component-palette__remove {
+  opacity: 1;
+}
+
+.component-palette__remove:hover {
+  background: var(--mv-danger);
+  color: white;
+}
+
 .component-palette__item:hover {
   background: var(--mv-bg-hover);
   border-color: var(--mv-border);

@@ -37,6 +37,56 @@ function node(id: string, x: number, y: number) {
 }
 
 describe('executeFlowchartCommand', () => {
+  it('keeps surviving edge routes with their connections when deleting an earlier edge', () => {
+    const source = [
+      'flowchart TD',
+      '  User([User]) --> Web[Web App]',
+      '  Web -->|API request| Service[Application Service]',
+      '  Service e3@==> Database[(Database)]',
+      '  Service -->|Send notification| Email[Email Provider]',
+      '  Email -->|Delivery status| DeliveryStatus[Delivery Status]',
+      '  Web e6@-->|API response| Response[Response]',
+      '  Response --> User',
+      '  DeliveryStatus e8@--> Email',
+      '',
+    ].join('\n')
+    const current = {
+      ...createDocumentSession('delete-edge-layout', 1, flowchartCompatibilityAdapter.parse(source, 1), {
+      ...layout,
+      elements: {
+        'node:Database': { x: 400, y: 300, width: 137, height: 135 },
+        'node:Ghost': { x: 0, y: 0, width: 10, height: 10 },
+      },
+      edges: {
+        'edge:e3': { routeMode: 'curved', sourceSide: 'right', targetSide: 'left' },
+        'edge:e4': { routeMode: 'curved', sourceSide: 'bottom', targetSide: 'top' },
+        'edge:e5': { routeMode: 'curved', sourceSide: 'bottom', targetSide: 'top' },
+        'edge:e6': { routeMode: 'curved', sourceSide: 'right', targetSide: 'bottom' },
+        'edge:e7': { routeMode: 'curved', sourceSide: 'left', targetSide: 'right' },
+        'edge:e8': { routeMode: 'curved', sourceSide: 'top', targetSide: 'bottom' },
+      },
+      }),
+      selection: ['edge:e3'] as const,
+    }
+
+    const result = executeFlowchartCommand(current, {
+      operations: [{ kind: 'delete-edge', id: 'e3' }], description: 'Delete edge e3',
+    }, dependencies)
+
+    expect(result).toMatchObject({ ok: true })
+    if (!result.ok) return
+    expect(result.value.layout.edges).toEqual({
+      'edge:e3': { routeMode: 'curved', sourceSide: 'bottom', targetSide: 'top' },
+      'edge:e4': { routeMode: 'curved', sourceSide: 'bottom', targetSide: 'top' },
+      'edge:e5': { routeMode: 'curved', sourceSide: 'left', targetSide: 'right' },
+      'edge:e6': { routeMode: 'curved', sourceSide: 'right', targetSide: 'bottom' },
+      'edge:e8': { routeMode: 'curved', sourceSide: 'top', targetSide: 'bottom' },
+    })
+    expect(result.value.layout.elements).toHaveProperty('node:Database')
+    expect(result.value.layout.elements).not.toHaveProperty('node:Ghost')
+    expect(result.value.selection).toEqual([])
+  })
+
   it('persists text alignment as a layout-only transaction without rewriting Mermaid', () => {
     const current = session()
     const result = executeFlowchartTextAlignmentCommand(current, 'A', { horizontal: 'right', vertical: 'bottom' }, dependencies)

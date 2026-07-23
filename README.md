@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="assets/icon.png" alt="Flowforge icon" width="128" />
+
 ![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)
@@ -101,7 +103,7 @@ cd flowforge
 npm install
 ```
 
-Then press **F5** in VS Code (Run → Start Debugging → *Run Extension (Dev / HMR)*). This launches an **Extension Development Host** window with Flowforge loaded and hot-reload running. Open any `.mmd` file in that window to start editing.
+Then press **F5** in VS Code (Run → Start Debugging → *Run Flowforge Extension (Dev / HMR)*). This launches an **Extension Development Host** window with Flowforge loaded and hot-reload running. Open any `.mmd` file in that window to start editing.
 
 No `.mmd` file handy? Create one:
 

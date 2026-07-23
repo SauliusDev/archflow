@@ -60,6 +60,9 @@ function CanvasFlow({ snapToGrid, layoutStyle }: { snapToGrid: boolean; layoutSt
   const { contextMenu, contextNode, containers, handleNodeContextMenu, closeContextMenu, duplicateNode, moveToSubgraph, moveToTopLevel, deleteNode, deleteLane } = useCanvasContextMenu()
   const { handleCanvasDragOver, handleCanvasDrop } = useCanvasDrop(screenToFlowPosition, snapToGrid)
   const { pendingConnect, handleNodeClick, handlePaneClick } = usePendingConnect(screenToFlowPosition, newEdgeRouteMode)
+  const displayEdges = useMemo(() => pendingConnect?.kind === 'reassign'
+    ? edges.filter(edge => edge.id !== pendingConnect.edgeId)
+    : edges, [edges, pendingConnect])
   const handleNodeMouseEnter = useCallback((_event: React.MouseEvent, node: { id: string }) => {
     const fixedNodeId = pendingConnect?.kind === 'reassign' ? pendingConnect.fixedNodeId : pendingConnect?.sourceId
     if (pendingConnect && node.id !== fixedNodeId) setPendingConnectTargetId(node.id)
@@ -101,7 +104,7 @@ function CanvasFlow({ snapToGrid, layoutStyle }: { snapToGrid: boolean; layoutSt
     <ZoomBar layoutStyle={layoutStyle} />
     <div className="canvas-workarea" onClickCapture={handleCanvasClick}>
       <ReactFlow
-        nodes={displayNodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
+        nodes={displayNodes} edges={displayEdges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
         onNodesChange={handleNodesChange} onEdgesChange={handleEdgesChange}
         onNodeDragStart={handleNodeDragStart} onNodeDrag={handleNodeDrag} onNodeDragStop={handleNodeDragStop}
         onNodeClick={isLocked ? undefined : handleNodeClick}
@@ -112,7 +115,7 @@ function CanvasFlow({ snapToGrid, layoutStyle }: { snapToGrid: boolean; layoutSt
         connectionMode={ConnectionMode.Loose} snapToGrid={snapToGrid} snapGrid={[GRID_SNAP, GRID_SNAP] as [number, number]}
         colorMode={colorMode} multiSelectionKeyCode="Shift" selectionOnDrag={false}
         panOnDrag nodesDraggable={!isLocked} nodesConnectable={false} elementsSelectable={!isLocked}
-        panOnScroll zoomOnScroll zoomOnPinch
+        panOnScroll zoomOnScroll zoomOnPinch zoomActivationKeyCode={null}
         fitView={paperGrid} fitViewOptions={paperGrid ? PAPER_GRID_INITIAL_FIT_OPTIONS : undefined}
         minZoom={paperGrid ? 0.08 : 0.1} maxZoom={paperGrid ? 1.6 : 4} selectionMode={SelectionMode.Partial}
       >
@@ -133,7 +136,7 @@ function CanvasFlow({ snapToGrid, layoutStyle }: { snapToGrid: boolean; layoutSt
   </div>
 }
 
-export default function Canvas({ snapToGrid = true, layoutStyle = 'classic' }: { snapToGrid?: boolean; layoutStyle?: LayoutStyle }): React.JSX.Element {
+export default function Canvas({ snapToGrid = false, layoutStyle = 'modern' }: { snapToGrid?: boolean; layoutStyle?: LayoutStyle }): React.JSX.Element {
   const family = useStore(state => state.documentSession?.family)
   if (family === 'class') return <ClassDiagramCanvas />
   return <ReactFlowProvider><CanvasFlow snapToGrid={snapToGrid} layoutStyle={layoutStyle} /></ReactFlowProvider>

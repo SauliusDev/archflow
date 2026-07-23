@@ -33,7 +33,7 @@ const editorStylesheets = [
   '../../../styles/components/class-diagram.css',
   '../../../styles/components/command-palette.css',
   '../../../styles/components/edge.css',
-  '../../../styles/components/inspector.css',
+  '../../../styles/components/canvas-node-inspector.css',
   '../../../styles/components/minimap.css',
   '../../../styles/components/node-color-picker.css',
   '../../../styles/components/node-toolbar.css',

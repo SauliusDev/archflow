@@ -1,8 +1,10 @@
 import { useEffect, useCallback, useRef } from 'react'
 import type { RefObject } from 'react'
 import type { EditorView, ViewUpdate } from '@codemirror/view'
+import { Transaction } from '@codemirror/state'
 import { useStore } from '@/state/createStore'
 
+const CANVAS_SYNC_EVENT = 'flowforge.canvas-sync'
 
 export function useSyncCanvasToCode(
   viewRef: RefObject<EditorView | null>,
@@ -19,7 +21,13 @@ export function useSyncCanvasToCode(
     if (current === code) return
 
     const savedPos = view.state.selection.main.head
-    view.dispatch({ changes: { from: 0, to: current.length, insert: code } })
+    // CodeMirror reports this dispatch as a document change. Tag it so the
+    // inbound Code-to-Canvas listener does not treat a Canvas edit as text
+    // typed by the user and overwrite the newer canvas transaction.
+    view.dispatch({
+      changes: { from: 0, to: current.length, insert: code },
+      annotations: Transaction.userEvent.of(CANVAS_SYNC_EVENT),
+    })
 
     const clampedPos = Math.min(savedPos, view.state.doc.length)
     if (clampedPos !== view.state.selection.main.head) {
@@ -39,6 +47,7 @@ export function useSyncCodeToCanvas(): (update: ViewUpdate) => void {
 
   return useCallback((update: ViewUpdate): void => {
     if (!update.docChanged) return
+    if (update.transactions?.some(transaction => transaction.annotation(Transaction.userEvent) === CANVAS_SYNC_EVENT)) return
 
     const { syncDirection, setSyncDirection, applyCodeSource } = useStore.getState()
     if (syncDirection === 'canvas') return

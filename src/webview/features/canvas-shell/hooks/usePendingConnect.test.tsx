@@ -71,12 +71,86 @@ describe('usePendingConnect', () => {
     target.remove()
   })
 
-  it('keeps a released edge endpoint tethered to the cursor before a new target is chosen', () => {
+  it('passes the exact target connector side from an arrow drag', () => {
+    const addEdge = vi.fn()
+    const target = document.createElement('div')
+    target.className = 'react-flow__node'
+    target.dataset.id = 'target'
+    const handle = document.createElement('div')
+    handle.dataset.attachmentSide = 'right'
+    target.append(handle)
+    document.body.append(target)
+    Object.defineProperty(document, 'elementFromPoint', { configurable: true, value: () => handle })
+    useStore.setState({
+      pendingConnect: { kind: 'new', sourceId: 'source', sourceSide: 'left' },
+      addEdge,
+    } as never)
+    renderHook(() => usePendingConnect(position => position))
+
+    act(() => window.dispatchEvent(new PointerEvent('pointerup', { clientX: 100, clientY: 100 })))
+
+    expect(addEdge).toHaveBeenCalledWith({ source: 'source', target: 'target', sourceSide: 'left', targetSide: 'right' }, 'curved')
+    target.remove()
+  })
+
+  it('snaps an arrow drop near a connector to the closest target side', () => {
+    const addEdge = vi.fn()
+    const target = document.createElement('div')
+    target.className = 'react-flow__node'
+    target.dataset.id = 'target'
+    Object.defineProperty(target, 'getBoundingClientRect', {
+      value: () => ({ left: 0, top: 0, right: 200, bottom: 100, width: 200, height: 100 }),
+    })
+    document.body.append(target)
+    Object.defineProperty(document, 'elementFromPoint', { configurable: true, value: () => target })
+    useStore.setState({
+      pendingConnect: { kind: 'new', sourceId: 'source', sourceSide: 'left' },
+      addEdge,
+    } as never)
+    renderHook(() => usePendingConnect(position => position))
+
+    act(() => window.dispatchEvent(new PointerEvent('pointerup', { clientX: 190, clientY: 45 })))
+
+    expect(addEdge).toHaveBeenCalledWith({ source: 'source', target: 'target', sourceSide: 'left', targetSide: 'right' }, 'curved')
+    target.remove()
+  })
+
+  it('keeps the target connector side when React Flow completes the node click first', () => {
+    const addEdge = vi.fn()
+    const target = document.createElement('div')
+    target.className = 'react-flow__node'
+    target.dataset.id = 'target'
+    const handle = document.createElement('div')
+    handle.dataset.attachmentSide = 'right'
+    target.append(handle)
+    document.body.append(target)
+    Object.defineProperty(document, 'elementFromPoint', { configurable: true, value: () => handle })
+    useStore.setState({
+      pendingConnect: { kind: 'new', sourceId: 'source', sourceSide: 'left' },
+      addEdge,
+    } as never)
+    const { result } = renderHook(() => usePendingConnect(position => position))
+
+    act(() => result.current.handleNodeClick({ clientX: 100, clientY: 100 } as React.MouseEvent, { id: 'target' } as never))
+
+    expect(addEdge).toHaveBeenCalledWith({ source: 'source', target: 'target', sourceSide: 'left', targetSide: 'right' }, 'curved')
+    target.remove()
+  })
+
+  it('retargets a released edge endpoint in one drag and preserves the hovered side', () => {
     const retargetEdgeEndpoint = vi.fn()
+    const target = document.createElement('div')
+    target.className = 'react-flow__node'
+    target.dataset.id = 'replacement'
+    const handle = document.createElement('div')
+    handle.dataset.attachmentSide = 'left'
+    target.append(handle)
+    document.body.append(target)
+    Object.defineProperty(document, 'elementFromPoint', { configurable: true, value: () => handle })
     useStore.setState({
       pendingConnect: {
         kind: 'reassign', edgeId: 'edge-1', endpoint: 'source', fixedNodeId: 'target',
-        cursor: { x: 10, y: 20 }, awaitingInitialRelease: true,
+        cursor: { x: 10, y: 20 },
       },
       retargetEdgeEndpoint,
     } as never)
@@ -84,10 +158,9 @@ describe('usePendingConnect', () => {
 
     act(() => window.dispatchEvent(new PointerEvent('pointerup', { clientX: 100, clientY: 100 })))
 
-    expect(retargetEdgeEndpoint).not.toHaveBeenCalled()
-    expect(useStore.getState().pendingConnect).toEqual(expect.objectContaining({
-      awaitingInitialRelease: false, cursor: { x: 100, y: 100 },
-    }))
+    expect(retargetEdgeEndpoint).toHaveBeenCalledWith('edge-1', 'source', 'replacement', 'left')
+    expect(useStore.getState().pendingConnect).toBeNull()
+    target.remove()
   })
 
   it('commits and reprojects Curved state for drag, pending-click, and pending-pane document-session connections', () => {
@@ -110,9 +183,8 @@ describe('usePendingConnect', () => {
     const state = useStore.getState()
     const session = state.documentSession!
     expect(state.edges.every(edge => edge.data?.routeMode === 'curved')).toBe(true)
-    expect(Object.values(session.layout.edges)).toEqual([
-      { routeMode: 'curved' }, { routeMode: 'curved' }, { routeMode: 'curved' },
-    ])
+    expect(Object.values(session.layout.edges)).toHaveLength(3)
+    expect(Object.values(session.layout.edges).every(route => route.routeMode === 'curved')).toBe(true)
     expect(session.source).not.toContain('curved')
 
     const reopened = createDocumentSession('pending-connect-reopen', 1, flowchartCompatibilityAdapter.parse(session.source, 1), session.layout)

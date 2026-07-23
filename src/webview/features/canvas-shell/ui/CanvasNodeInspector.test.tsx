@@ -6,7 +6,7 @@ import type { FlowNodeData } from '@/features/flowchart'
 import { useStore } from '@/state/createStore'
 import { createDocumentSession } from '@/lib/documentSession'
 import { flowchartCompatibilityAdapter } from '@/features/flowchart'
-import { FILL_SWATCHES } from '@/features/flowchart'
+import { FILL_SWATCHES, STROKE_SWATCHES, TEXT_SWATCHES } from '@/features/flowchart'
 import CanvasNodeInspector from './CanvasNodeInspector'
 import Canvas from './Canvas'
 
@@ -64,14 +64,13 @@ describe('CanvasNodeInspector', () => {
     expect(screen.queryByRole('complementary', { name: 'Node inspector' })).toBeNull()
   })
 
-  it('commits multiline node text on blur', () => {
+  it('updates multiline node text as it is typed', () => {
     useStore.setState({ nodes: [node()] })
     const updateNodeLabel = vi.spyOn(useStore.getState(), 'updateNodeLabel')
 
     render(<CanvasNodeInspector />)
     const text = screen.getByLabelText('Node text')
     fireEvent.change(text, { target: { value: 'First line\nSecond line' } })
-    fireEvent.blur(text)
 
     expect(updateNodeLabel).toHaveBeenCalledWith('node-1', 'First line\nSecond line')
     updateNodeLabel.mockRestore()
@@ -99,36 +98,40 @@ describe('CanvasNodeInspector', () => {
     updateNodeTextAlignment.mockRestore()
   })
 
-  it('keeps fill, border, and text colors linked', () => {
+  it('updates fill, border, and text colors independently', () => {
     useStore.setState({ nodes: [node()] })
     const updateNodeColors = vi.spyOn(useStore.getState(), 'updateNodeColors')
 
     render(<CanvasNodeInspector />)
-    fireEvent.change(screen.getByLabelText('Border color'), { target: { value: '#123456' } })
+    fireEvent.change(screen.getByLabelText('Fill color'), { target: { value: '#123456' } })
+    fireEvent.change(screen.getByLabelText('Border color'), { target: { value: '#234567' } })
+    fireEvent.change(screen.getByLabelText('Text color'), { target: { value: '#345678' } })
 
-    expect(updateNodeColors).toHaveBeenCalledWith('node-1', { fillColor: '#123456', strokeColor: '#123456', textColor: '#123456' })
+    expect(updateNodeColors).toHaveBeenNthCalledWith(1, 'node-1', { fillColor: '#123456' })
+    expect(updateNodeColors).toHaveBeenNthCalledWith(2, 'node-1', { strokeColor: '#234567' })
+    expect(updateNodeColors).toHaveBeenNthCalledWith(3, 'node-1', { textColor: '#345678' })
     updateNodeColors.mockRestore()
   })
 
-  it('provides three linked native color inputs and one shared palette', () => {
+  it('provides a custom picker followed by the shared palette in each color row', () => {
     useStore.setState({ nodes: [node()] })
 
     render(<CanvasNodeInspector />)
 
     expect(screen.getByLabelText('Fill color')).toBeTruthy()
-    expect(screen.getByLabelText('Border color')).toBeTruthy()
-    expect(screen.getByLabelText('Text color')).toBeTruthy()
-    expect(screen.getByRole('group', { name: 'Linked color swatches' }).querySelectorAll('button')).toHaveLength(FILL_SWATCHES.length)
+    expect(screen.getByRole('group', { name: 'Fill color swatches' }).querySelectorAll('button')).toHaveLength(FILL_SWATCHES.length)
+    expect(screen.getByRole('group', { name: 'Border color swatches' }).querySelectorAll('button')).toHaveLength(STROKE_SWATCHES.length)
+    expect(screen.getByRole('group', { name: 'Text color swatches' }).querySelectorAll('button')).toHaveLength(TEXT_SWATCHES.length)
   })
 
-  it('updates all colors from a shared preset swatch', () => {
+  it('updates only the selected color channel from a preset swatch', () => {
     useStore.setState({ nodes: [node()] })
     const updateNodeColors = vi.spyOn(useStore.getState(), 'updateNodeColors')
 
     render(<CanvasNodeInspector />)
-    fireEvent.click(screen.getByRole('button', { name: `Set all colors to ${FILL_SWATCHES[1]}` }))
+    fireEvent.click(screen.getByRole('button', { name: `Border color ${STROKE_SWATCHES[1]}` }))
 
-    expect(updateNodeColors).toHaveBeenCalledWith('node-1', { fillColor: FILL_SWATCHES[1], strokeColor: FILL_SWATCHES[1], textColor: FILL_SWATCHES[1] })
+    expect(updateNodeColors).toHaveBeenCalledWith('node-1', { strokeColor: STROKE_SWATCHES[1] })
     updateNodeColors.mockRestore()
   })
 
@@ -178,6 +181,18 @@ describe('CanvasNodeInspector', () => {
 
     expect(updateNodeShape).toHaveBeenCalledWith('node-1', 'diamond')
     updateNodeShape.mockRestore()
+  })
+
+  it('centers the circle preview and fills its square viewBox', () => {
+    useStore.setState({ nodes: [node()] })
+
+    render(<CanvasNodeInspector />)
+
+    const circle = screen.getByRole('button', { name: 'Node shape Circle' }).querySelector('circle')
+    expect(circle).not.toBeNull()
+    expect(circle?.getAttribute('cx')).toBe('60')
+    expect(circle?.getAttribute('cy')).toBe('60')
+    expect(circle?.getAttribute('r')).toBe('59')
   })
 
   it('disables every mutation control while the canvas is locked', () => {

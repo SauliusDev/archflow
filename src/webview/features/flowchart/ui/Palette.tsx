@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useShallow } from 'zustand/react/shallow'
 import { useStore } from '@/state/createStore'
 import { ADVANCED_SHAPE_CATALOG, GENERAL_SHAPE_CATALOG, getShapeDefinition, type ShapeDefinition } from '../domain/shapeCatalog'
-import { readScratchpadShapeIds } from '../state/scratchpadShapes'
+import { readScratchpadShapeIds, removeScratchpadShape } from '../state/scratchpadShapes'
 import { ShapeGraphic } from './ShapeGraphic'
 
 interface ClassPaletteItem {
@@ -28,37 +28,39 @@ function ShapeSection({
   items,
   onSelect,
   onDragStart,
+  onRemove,
 }: {
   title: string
   items: readonly ShapeDefinition[]
   onSelect: (item: ShapeDefinition) => void
   onDragStart: (event: React.DragEvent, item: ShapeDefinition) => void
+  onRemove?: (item: ShapeDefinition) => void
 }): React.JSX.Element {
   const headingId = `shape-section-${title.toLowerCase()}`
   return (
     <section className="component-palette__section" aria-labelledby={headingId}>
       <h2 className="component-palette__category" id={headingId}>{title}</h2>
       {items.length ? <div className="component-palette__grid">
-        {items.map(item => (
+        {items.map(item => <div key={item.id} className="component-palette__item-wrap">
           <button
-            key={item.id}
-            type="button"
-            className="component-palette__item"
-            draggable
-            aria-label={item.label}
-            onDragStart={event => onDragStart(event, item)}
-            onClick={() => onSelect(item)}
-            onKeyDown={event => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                onSelect(item)
-              }
-            }}
-          >
-            <ShapeGraphic shape={item.shape} mermaidShape={item.mermaidShape} className="component-palette__shape-preview" />
-            <span className="component-palette__item-label">{item.label}</span>
-          </button>
-        ))}
+              type="button"
+              className="component-palette__item"
+              draggable
+              aria-label={item.label}
+              onDragStart={event => onDragStart(event, item)}
+              onClick={() => onSelect(item)}
+              onKeyDown={event => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  onSelect(item)
+                }
+              }}
+            >
+              <ShapeGraphic shape={item.shape} mermaidShape={item.mermaidShape} className="component-palette__shape-preview" />
+              <span className="component-palette__item-label">{item.label}</span>
+            </button>
+          {onRemove && <button type="button" className="component-palette__remove" aria-label={`Remove ${item.label} from Scratchpad`} title="Remove from Scratchpad" onClick={() => onRemove(item)}>✕</button>}
+        </div>)}
       </div> : <p className="component-palette__empty component-palette__empty--scratchpad">Save any shape from its node toolbar to reuse it here.</p>}
     </section>
   )
@@ -66,6 +68,7 @@ function ShapeSection({
 
 export default function Palette({ onClose, triggerRef }: PaletteProps): React.JSX.Element {
   const [query, setQuery] = useState('')
+  const [scratchpadIds, setScratchpadIds] = useState(readScratchpadShapeIds)
   const paletteRef = useRef<HTMLDivElement>(null)
   const nodes = useStore(s => s.nodes)
   const documentFamily = useStore(s => s.documentSession?.family)
@@ -125,6 +128,10 @@ export default function Palette({ onClose, triggerRef }: PaletteProps): React.JS
   }
 
   const matchesQuery = (item: ShapeDefinition): boolean => item.label.toLowerCase().includes(query.toLowerCase())
+  function handleRemoveFromScratchpad(item: ShapeDefinition): void {
+    setScratchpadIds(removeScratchpadShape(item.id))
+    useStore.getState().announce(`${item.label} removed from Scratchpad`)
+  }
   if (documentFamily === 'class') {
     return (
       <div ref={paletteRef} className="component-palette" role="dialog" aria-modal="true" aria-label="Shape palette">
@@ -134,7 +141,7 @@ export default function Palette({ onClose, triggerRef }: PaletteProps): React.JS
     )
   }
 
-  const scratchpadItems = readScratchpadShapeIds().map(getShapeDefinition).filter((item): item is ShapeDefinition => item !== undefined).filter(matchesQuery)
+  const scratchpadItems = scratchpadIds.map(getShapeDefinition).filter((item): item is ShapeDefinition => item !== undefined).filter(matchesQuery)
   const generalItems = GENERAL_SHAPE_CATALOG.filter(matchesQuery)
   const advancedItems = ADVANCED_SHAPE_CATALOG.filter(matchesQuery)
   const hasMatches = scratchpadItems.length + generalItems.length + advancedItems.length > 0
@@ -144,7 +151,7 @@ export default function Palette({ onClose, triggerRef }: PaletteProps): React.JS
       <div className="component-palette__header"><span className="component-palette__title">Shapes</span><button className="component-palette__close" aria-label="Close palette" onClick={onClose}>✕</button></div>
       <input className="component-palette__search" type="text" placeholder="Search shapes…" value={query} onChange={event => setQuery(event.target.value)} aria-label="Search shapes" autoFocus />
       {hasMatches ? <>
-        <ShapeSection title="Scratchpad" items={scratchpadItems} onSelect={handleShapeClick} onDragStart={handleDragStart} />
+        <ShapeSection title="Scratchpad" items={scratchpadItems} onSelect={handleShapeClick} onDragStart={handleDragStart} onRemove={handleRemoveFromScratchpad} />
         <ShapeSection title="General" items={generalItems} onSelect={handleShapeClick} onDragStart={handleDragStart} />
         <ShapeSection title="Advanced" items={advancedItems} onSelect={handleShapeClick} onDragStart={handleDragStart} />
       </> : <p className="component-palette__empty">No shapes match &ldquo;{query}&rdquo;</p>}

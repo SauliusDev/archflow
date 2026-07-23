@@ -2,11 +2,35 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import mermaid from 'mermaid'
 import { useStore } from '@/state/createStore'
 import { canonicalSourceForExport } from '@/lib/adapterPlatform'
+import type { DocumentSession } from '@/lib/documentSession'
 import PreviewBar from './PreviewBar'
 import type { Direction, MermaidTheme, CurveStyle, Look } from './PreviewBar'
 
 mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'loose' })
 let renderIdCounter = 0
+
+/**
+ * Mermaid creates a node for a `style MissingNode ...` directive even when
+ * that node is not part of the graph. The Canvas deliberately does not do
+ * that, so remove only those stale style directives from the preview render.
+ * The document source remains untouched so users can still edit it in Code.
+ */
+function previewSourceForSession(code: string, session: DocumentSession | null): string {
+  if (session?.family !== 'flowchart') return code
+  const model = session.projection.model as {
+    nodes?: Array<{ id: string }>
+    edges?: Array<{ source: string; target: string }>
+  }
+  if (!Array.isArray(model.nodes) || !Array.isArray(model.edges)) return code
+
+  const graphNodeIds = new Set([
+    ...model.nodes.map(node => node.id),
+    ...model.edges.flatMap(edge => [edge.source, edge.target]),
+  ])
+  return code.replace(/^\s*style\s+([^\s]+)\b.*(?:\r\n|\n|\r|$)/gm, (line, id: string) =>
+    graphNodeIds.has(id) ? line : '',
+  )
+}
 
 export default function PreviewPanel(): React.JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -17,6 +41,10 @@ export default function PreviewPanel(): React.JSX.Element {
   const code = useMemo(
     () => codeSource || canonicalSourceForExport(documentSession, codeSource),
     [codeSource, documentSession],
+  )
+  const previewSource = useMemo(
+    () => previewSourceForSession(code, documentSession),
+    [code, documentSession],
   )
 
   const [direction, setDirection] = useState<Direction>('TD')
@@ -35,7 +63,7 @@ export default function PreviewPanel(): React.JSX.Element {
       look,
       flowchart: { curve },
     })
-    const directedCode = code.replace(/^(flowchart|graph)\s+\w+/m, `flowchart ${direction}`)
+    const directedCode = previewSource.replace(/^(flowchart|graph)\s+\w+/m, `flowchart ${direction}`)
     const id = `mermaid-svg-${++renderIdCounter}`
     mermaid.render(id, directedCode)
       .then(({ svg }) => {
@@ -53,7 +81,7 @@ export default function PreviewPanel(): React.JSX.Element {
         }
       })
     return () => { cancelled = true }
-  }, [code, direction, theme, curve, look, workingRevision])
+  }, [previewSource, direction, theme, curve, look, workingRevision])
 
   useEffect(() => {
     const el = bodyRef.current

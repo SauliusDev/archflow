@@ -17,6 +17,7 @@ let capturedPanOnDrag: boolean | undefined
 let capturedPanOnScroll: boolean | undefined
 let capturedZoomOnScroll: boolean | undefined
 let capturedZoomOnPinch: boolean | undefined
+let capturedZoomActivationKeyCode: string | null | undefined
 let capturedSelectionOnDrag: boolean | undefined
 let capturedElementsSelectable: boolean | undefined
 let capturedMinZoom: number | undefined
@@ -39,6 +40,7 @@ vi.mock('@xyflow/react', () => ({
     panOnScroll?: boolean
     zoomOnScroll?: boolean
     zoomOnPinch?: boolean
+    zoomActivationKeyCode?: string | null
     selectionOnDrag?: boolean
     elementsSelectable?: boolean
     minZoom?: number
@@ -60,6 +62,7 @@ vi.mock('@xyflow/react', () => ({
     capturedPanOnScroll = props.panOnScroll
     capturedZoomOnScroll = props.zoomOnScroll
     capturedZoomOnPinch = props.zoomOnPinch
+    capturedZoomActivationKeyCode = props.zoomActivationKeyCode
     capturedSelectionOnDrag = props.selectionOnDrag
     capturedElementsSelectable = props.elementsSelectable
     capturedMinZoom = props.minZoom
@@ -486,7 +489,7 @@ describe('Canvas', () => {
         dataTransfer: { getData: (key: string) => key === 'application/reactflow-palette' ? 'subgraph' : '' },
       })
     })
-    expect(mockAddSubgraph).toHaveBeenCalledWith({ x: 96, y: 120 })
+    expect(mockAddSubgraph).toHaveBeenCalledWith({ x: 100, y: 110 })
   })
 
   it('keeps a top-level node out of a group header while dragging and on release', () => {
@@ -604,14 +607,20 @@ describe('Canvas', () => {
     expect(capturedSelectionOnDrag).toBe(false)
   })
 
+  it('disables React Flow’s Command/Control zoom modifier so native textarea shortcuts work', () => {
+    render(<Canvas />)
+
+    expect(capturedZoomActivationKeyCode).toBeNull()
+  })
+
   it('uses the standard minimum zoom range', () => {
     render(<Canvas />)
-    expect(capturedMinZoom).toBe(0.1)
+    expect(capturedMinZoom).toBe(0.08)
   })
 
   it('uses the standard maximum zoom range', () => {
     render(<Canvas />)
-    expect(capturedMaxZoom).toBe(4)
+    expect(capturedMaxZoom).toBe(1.6)
   })
 
   it('Ctrl+0 zooms canvas to 100%', () => {
@@ -643,7 +652,7 @@ describe('Canvas', () => {
     act(() => {
       fireEvent.keyDown(window, { key: 'F', ctrlKey: true, shiftKey: true })
     })
-    expect(mockFitView).toHaveBeenCalledWith({ padding: 0.1, duration: 200, maxZoom: 1 })
+    expect(mockFitView).toHaveBeenCalledWith({ padding: 0.2, duration: 360, maxZoom: 1 })
   })
 
   it('Ctrl++ zooms in', () => {
@@ -783,7 +792,8 @@ describe('Canvas', () => {
       useStore.getState().addNode(makeNode('a'))
       render(<Canvas />)
       // jsdom doesn't fully implement isContentEditable; patch activeElement directly
-      const fakeEl = { tagName: 'DIV', isContentEditable: true } as HTMLElement
+      const fakeEl = document.createElement('div')
+      Object.defineProperty(fakeEl, 'isContentEditable', { value: true })
       const descriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'activeElement')!
       Object.defineProperty(document, 'activeElement', { get: () => fakeEl, configurable: true })
       try {
@@ -972,7 +982,7 @@ describe('Canvas', () => {
           useStore.getState().requestAddNode('subgraph')
         })
         expect(mockScreenToFlowPosition).toHaveBeenCalledWith({ x: 60, y: 70 })
-        expect(mockAddSubgraph).toHaveBeenCalledWith({ x: 72, y: 72 })
+        expect(mockAddSubgraph).toHaveBeenCalledWith({ x: 60, y: 70 })
       } finally {
         document.body.removeChild(flow)
       }
@@ -1001,7 +1011,7 @@ describe('Canvas', () => {
       act(() => {
         useStore.getState().dispatchZoomAction('fit')
       })
-      expect(mockFitView).toHaveBeenCalledWith({ padding: 0.1, duration: 200, maxZoom: 1 })
+      expect(mockFitView).toHaveBeenCalledWith({ padding: 0.2, duration: 360, maxZoom: 1 })
     })
   })
 })

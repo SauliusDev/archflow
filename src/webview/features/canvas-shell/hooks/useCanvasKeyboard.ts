@@ -10,17 +10,22 @@ interface CanvasKeyboardControls {
   fitView: (options: CanvasFitViewOptions) => void
 }
 
-function isEditableElement(): boolean {
-  const activeElement = document.activeElement as HTMLElement | null
-  return activeElement?.tagName === 'INPUT'
-    || activeElement?.tagName === 'TEXTAREA'
-    || Boolean(activeElement?.isContentEditable)
+function isEditableNode(element: HTMLElement | null): boolean {
+  return element?.tagName === 'INPUT'
+    || element?.tagName === 'TEXTAREA'
+    || Boolean(element?.isContentEditable)
+}
+
+function isEditableElement(target: EventTarget | null): boolean {
+  const targetElement = target instanceof HTMLElement ? target : null
+  const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null
+  return isEditableNode(targetElement) || isEditableNode(activeElement)
 }
 
 export function useCanvasKeyboard({ zoomIn, zoomOut, zoomTo, fitView, fitViewOptions = { padding: 0.1, duration: 200, maxZoom: 1 } }: CanvasKeyboardControls & { fitViewOptions?: CanvasFitViewOptions }): void {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
-      const editable = isEditableElement()
+      const editable = isEditableElement(event.target)
       const state = useStore.getState()
 
       if (event.key === 'Escape' && !editable) {

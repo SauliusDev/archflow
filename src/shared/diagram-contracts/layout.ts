@@ -94,12 +94,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export function flowchartNodeConnections(layout: LayoutStateV2): FlowchartNodeConnections {
   const flowchart = layout.adapterMetadata?.flowchart
-  if (!isRecord(flowchart)) return { mode: 'free', autoReassign: false }
+  if (!isRecord(flowchart)) return { mode: 'side', autoReassign: true }
   const nodeConnections = flowchart.nodeConnections
   if (!isRecord(nodeConnections)
       || (nodeConnections.mode !== 'free' && nodeConnections.mode !== 'side')
       || typeof nodeConnections.autoReassign !== 'boolean') {
-    return { mode: 'free', autoReassign: false }
+    return { mode: 'side', autoReassign: true }
   }
   return { mode: nodeConnections.mode, autoReassign: nodeConnections.autoReassign }
 }

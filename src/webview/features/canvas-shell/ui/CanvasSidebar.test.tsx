@@ -268,14 +268,14 @@ describe('CanvasSidebar', () => {
   it('clicking zoom-to-fit button uses adaptive canvas framing', () => {
     render(<CanvasSidebar />)
     fireEvent.click(screen.getByRole('button', { name: 'Zoom to Fit' }))
-    expect(mockFitView).toHaveBeenCalledWith({ padding: 0.2, duration: 200, maxZoom: 1 })
+    expect(mockFitView).toHaveBeenCalledWith({ padding: 0.1, duration: 200, maxZoom: 1 })
   })
 
   it('clicking auto-layout button calls fitView() when nodes exist', () => {
     render(<CanvasSidebar />)
     fireEvent.click(screen.getByRole('button', { name: 'Add Subgraph' }))
     fireEvent.click(screen.getByRole('button', { name: 'Apply auto-layout' }))
-    expect(mockFitView).toHaveBeenCalledWith({ padding: 0.2 })
+    expect(mockFitView).toHaveBeenCalledWith({ padding: 0.1 })
   })
 
   it('clicking redo button restores node removed by undo', () => {

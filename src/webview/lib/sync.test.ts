@@ -64,9 +64,9 @@ describe('useSyncCanvasToCode', () => {
     const view = makeMockView('old content', 0)
     const viewRef = { current: view }
     renderHook(() => useSyncCanvasToCode(viewRef as never, 'new content'))
-    expect(view.dispatch).toHaveBeenCalledWith({
+    expect(view.dispatch).toHaveBeenCalledWith(expect.objectContaining({
       changes: { from: 0, to: 'old content'.length, insert: 'new content' },
-    })
+    }))
   })
 
   it('does nothing when code matches current doc', () => {
@@ -80,9 +80,9 @@ describe('useSyncCanvasToCode', () => {
     const view = makeMockView('old content', 0)
     const viewRef = { current: view }
     renderHook(() => useSyncCanvasToCode(viewRef as never, 'new content'))
-    expect(view.dispatch).toHaveBeenCalledWith({
+    expect(view.dispatch).toHaveBeenCalledWith(expect.objectContaining({
       changes: { from: 0, to: 'old content'.length, insert: 'new content' },
-    })
+    }))
   })
 
   it('restores cursor position after dispatch', () => {
@@ -181,6 +181,18 @@ describe('useSyncCodeToCanvas', () => {
     })
     expect(mockState.setSyncDirection).not.toHaveBeenCalled()
     expect(mockState.importFromCode).not.toHaveBeenCalled()
+  })
+
+  it('does not feed a programmatic Canvas-to-Code update back into the document', () => {
+    const { result } = renderHook(() => useSyncCodeToCanvas())
+    act(() => {
+      result.current({
+        ...makeUpdate(true),
+        transactions: [{ annotation: vi.fn(() => 'flowforge.canvas-sync') }],
+      } as never)
+    })
+    expect(mockState.setSyncDirection).not.toHaveBeenCalled()
+    expect(mockState.applyCodeSource).not.toHaveBeenCalled()
   })
 
   it('calls setSyncDirection("code") immediately when docChanged', () => {

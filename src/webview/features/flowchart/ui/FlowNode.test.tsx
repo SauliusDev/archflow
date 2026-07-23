@@ -355,6 +355,7 @@ describe('FlowNode', () => {
       const input = screen.getByRole('textbox', { name: 'Node text' })
       expect(input).toBeInstanceOf(HTMLTextAreaElement)
       expect((input as HTMLTextAreaElement).value).toBe('Test')
+      expect(input.parentElement?.className).toContain('flow-node')
     })
 
     it('renders the label editor without its own field frame', () => {
@@ -362,6 +363,49 @@ describe('FlowNode', () => {
       fireEvent.dblClick(screen.getByText('Test'))
 
       expect(screen.getByRole('textbox').className).toContain('flow-node__label-input--plain')
+    })
+
+    it('marks the editor as exempt from React Flow keyboard, pan, wheel, and drag handling', () => {
+      render(<FlowNode {...makeNodeProps('rectangle', 'Test')} />)
+      fireEvent.dblClick(screen.getByText('Test'))
+
+      const editor = screen.getByRole('textbox')
+      expect(editor.className).toContain('nodrag')
+      expect(editor.className).toContain('nopan')
+      expect(editor.className).toContain('nowheel')
+      expect(editor.className).toContain('nokey')
+    })
+
+    it('keeps native Command text shortcuts available to the textarea', () => {
+      render(<FlowNode {...makeNodeProps('rectangle', 'Test')} />)
+      fireEvent.dblClick(screen.getByText('Test'))
+      const editor = screen.getByRole('textbox')
+      const hostKeyDown = vi.fn()
+      window.addEventListener('keydown', hostKeyDown)
+
+      try {
+        for (const key of ['a', 'c', 'v']) {
+          const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key, metaKey: true })
+          editor.dispatchEvent(event)
+          expect(event.defaultPrevented).toBe(false)
+        }
+        expect(hostKeyDown).toHaveBeenCalledTimes(3)
+      } finally {
+        window.removeEventListener('keydown', hostKeyDown)
+      }
+    })
+
+    it('uses the node text alignment while editing', () => {
+      const props = {
+        ...makeNodeProps('rectangle', 'Aligned'),
+        data: { label: 'Aligned', shape: 'rectangle' as const, textHorizontalAlign: 'right' as const, textVerticalAlign: 'bottom' as const },
+      }
+      render(<FlowNode {...props} />)
+      fireEvent.dblClick(screen.getByText('Aligned'))
+
+      const editor = screen.getByRole('textbox')
+      expect(editor.className).toContain('flow-node__label-input--horizontal-right')
+      expect(editor.parentElement?.className).toContain('flow-node--text-vertical-bottom')
     })
 
     it('allows Enter to retain a pasted newline until blur commits the label', () => {
@@ -377,6 +421,15 @@ describe('FlowNode', () => {
 
       expect(useStore.getState().nodes[0].data.label).toBe('First line\nSecond line')
       expect(screen.queryByRole('textbox', { name: 'Node text' })).toBeNull()
+    })
+
+    it('keeps the open inline editor synchronized with an externally updated label', () => {
+      const { rerender } = render(<FlowNode {...makeNodeProps('rectangle', 'Test')} />)
+      fireEvent.dblClick(screen.getByText('Test'))
+
+      rerender(<FlowNode {...makeNodeProps('rectangle', 'Updated in inspector')} />)
+
+      expect((screen.getByRole('textbox', { name: 'Node text' }) as HTMLTextAreaElement).value).toBe('Updated in inspector')
     })
 
     it('pressing Escape cancels editing without updating the store', () => {

@@ -113,11 +113,18 @@
 .flow-node__label-input--plain {
   padding: 8px 16px;
   color: var(--mv-node-text);
-  background: transparent;
-  border-color: transparent;
+  background: var(--mv-transparent);
+  border-color: var(--mv-transparent);
   border-radius: 0;
   caret-color: var(--mv-accent);
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
 }
+
+.flow-node__label-input--horizontal-left { text-align: left; }
+.flow-node__label-input--horizontal-center { text-align: center; }
+.flow-node__label-input--horizontal-right { text-align: right; }
 
 /* ── Shape Variants ────────────────────────────────────────────────────────── */
 

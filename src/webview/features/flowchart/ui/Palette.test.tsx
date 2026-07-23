@@ -14,6 +14,7 @@ import Palette from './Palette'
 import { useStore } from '@/state/createStore'
 import { mockReactFlow } from '../../../setupTests'
 import { classAdapter } from '@/features/class-diagram'
+import { addScratchpadShape, readScratchpadShapeIds } from '../state/scratchpadShapes'
 import { createDocumentSession } from '@/lib/documentSession'
 import type { LayoutStateV2 } from '../../../../shared/diagram-contracts'
 
@@ -40,6 +41,7 @@ describe('Palette', () => {
   beforeEach(() => {
     mockOnClose.mockClear()
     useStore.setState({ nodes: [], edges: [] })
+    window.localStorage.clear()
   })
 
   it('renders title "Shapes" in header', () => {
@@ -133,6 +135,18 @@ describe('Palette', () => {
     expect(nodes).toHaveLength(1)
     expect(nodes[0].data.shape).toBe('rectangle')
     expect(nodes[0].data.label).toBe('Rectangle')
+  })
+
+  it('removes scratchpad shapes from the add-element panel without adding a node', () => {
+    addScratchpadShape('general:document')
+    render(<Palette onClose={mockOnClose} triggerRef={mockTriggerRef} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove Document from Scratchpad' }))
+
+    expect(readScratchpadShapeIds()).toEqual([])
+    expect(screen.queryByRole('button', { name: 'Remove Document from Scratchpad' })).toBeNull()
+    expect(screen.getByText(/Save any shape from its node toolbar/)).toBeTruthy()
+    expect(useStore.getState().nodes).toEqual([])
   })
 
   it('creates a generalized shape with the same data from keyboard activation and returns focus to its trigger', () => {

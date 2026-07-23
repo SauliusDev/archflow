@@ -12,8 +12,8 @@ function graphic(renderer: ShapeRenderer): React.JSX.Element {
     case 'rounded': return <rect x="1" y="1" width="118" height="38" rx="8" {...common} />
     case 'pill': return <rect x="1" y="1" width="118" height="38" rx="20" {...common} />
     case 'diamond': return <polygon points="60,1 119,60 60,119 1,60" {...common} />
-    case 'circle': return <circle cx="40" cy="40" r="39" {...common} />
-    case 'double-circle': return <><circle cx="40" cy="40" r="39" {...common} /><circle cx="40" cy="40" r="31" {...common} fill="none" /></>
+    case 'circle': return <circle cx="60" cy="60" r="59" {...common} />
+    case 'double-circle': return <><circle cx="60" cy="60" r="59" {...common} /><circle cx="60" cy="60" r="51" {...common} fill="none" /></>
     case 'hexagon': return <polygon points="20,1 100,1 119,25 100,49 20,49 1,25" {...common} />
     case 'cylinder': return <><path d="M1 9C1 4 27 1 60 1s59 3 59 8v42c0 5-26 8-59 8S1 56 1 51V9Z" {...common} /><ellipse cx="60" cy="9" rx="59" ry="8" {...common} /></>
     case 'bang': return <path d="M16 1h88l15 19-15 19H16L1 20 16 1Z" {...common} />
@@ -38,7 +38,7 @@ function graphic(renderer: ShapeRenderer): React.JSX.Element {
     case 'divided-rectangle': return <><rect x="1" y="1" width="118" height="48" {...common} /><path d="M1 14h118" {...common} fill="none" /></>
     case 'fork': return <path d="M51 1h18v19h50v18H69v11H51V38H1V20h50V1Z" {...common} />
     case 'window-pane': return <><rect x="1" y="1" width="118" height="48" {...common} /><path d="M1 14h118M40 14v35M80 14v35" {...common} fill="none" /></>
-    case 'filled-circle': return <circle cx="40" cy="40" r="39" {...common} />
+    case 'filled-circle': return <circle cx="60" cy="60" r="59" {...common} />
     case 'tagged-document': return <path d="M1 1h118v37c-14-10-28-10-42 0-14-10-28-10-42 0-12-8-23-8-34 0V1Zm0 0 16 13h20" {...common} />
     case 'tagged-rectangle': return <path d="M1 1h118v48H1V1Zm0 0 16 13h22" {...common} />
     case 'sloped-rectangle': return <polygon points="1,12 119,1 119,49 1,49" {...common} />

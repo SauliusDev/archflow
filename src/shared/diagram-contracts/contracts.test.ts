@@ -119,8 +119,8 @@ describe('diagram contracts', () => {
     }
   })
 
-  test('defaults legacy flowchart node connection metadata to free endpoints', () => {
-    expect(flowchartNodeConnections(validLayout())).toEqual({ mode: 'free', autoReassign: false })
+  test('defaults legacy flowchart node connection metadata to side endpoints with reassignment', () => {
+    expect(flowchartNodeConnections(validLayout())).toEqual({ mode: 'side', autoReassign: true })
   })
 
   test('accepts serializable adapter metadata', () => {

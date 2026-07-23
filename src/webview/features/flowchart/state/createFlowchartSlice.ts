@@ -84,13 +84,14 @@ function connectionAttachmentSides(
   sourceId: string,
   targetId: string,
   requestedSourceSide?: EdgeAttachmentSide,
+  requestedTargetSide?: EdgeAttachmentSide,
 ): { sourceSide: EdgeAttachmentSide; targetSide: EdgeAttachmentSide } | undefined {
   const source = nodes.find(node => node.id === sourceId);
   const target = nodes.find(node => node.id === targetId);
   if (!source || !target) return undefined;
   return {
     sourceSide: requestedSourceSide ?? optimalAttachmentSide(source, target, nodes),
-    targetSide: optimalAttachmentSide(target, source, nodes),
+    targetSide: requestedTargetSide ?? optimalAttachmentSide(target, source, nodes),
   };
 }
 
@@ -804,7 +805,13 @@ export const createFlowchartSlice: StateCreator<
     const { nodes, edges, documentSession, isLocked } = get();
     if (isLocked) return;
     const edge = edges.find(candidate => candidate.id === id);
-    if (!edge || edge[endpoint] === nodeId) return;
+    if (!edge) return;
+    // Dropping an endpoint on a different side of its current node is a side
+    // reassignment, not a no-op. The old guard made that gesture snap back.
+    if (edge[endpoint] === nodeId) {
+      if (side) get().setEdgeAttachmentSide(id, endpoint, side);
+      return;
+    }
     if (documentSession) {
       if (!reportFlowchartSessionGuard(documentSession, 'retarget edge endpoint', set)) return;
       const result = executeFlowchartNodeConnectionCommand(
@@ -898,7 +905,7 @@ export const createFlowchartSlice: StateCreator<
     });
   },
 
-  addEdge: ({ source, target, sourceSide }, routeMode = 'curved') => {
+  addEdge: ({ source, target, sourceSide, targetSide }, routeMode = 'curved') => {
     const { nodes, edges, documentSession, isLocked } = get();
     if (isLocked || (documentSession && !reportFlowchartSessionGuard(documentSession, "add edge", set))) return;
     if (source === target) {
@@ -912,7 +919,7 @@ export const createFlowchartSlice: StateCreator<
     // Floating edges: no sourceHandle/targetHandle stored — the edge attaches to
     // the optimal node border point, computed in FlowEdge from live positions.
     const attachment = documentSession && flowchartNodeConnections(documentSession.layout).mode === 'side'
-      ? connectionAttachmentSides(nodes, source, target, sourceSide)
+      ? connectionAttachmentSides(nodes, source, target, sourceSide, targetSide)
       : undefined;
     const newEdge: Edge<FlowEdgeData> = {
       id: `e-${source}-${target}`,

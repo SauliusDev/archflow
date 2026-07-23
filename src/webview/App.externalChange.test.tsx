@@ -175,6 +175,28 @@ describe('App.tsx — EXTERNAL_FILE_CHANGE and LOAD message handling', () => {
       })
     })
 
+    it('acknowledges a same-content external echo without blocking undo', () => {
+      const nodeA = makeFlowNode('A')
+      vi.mocked(parseMermaidFlowchart).mockReturnValue(makeParseSuccess([nodeA]))
+      loadSession()
+      const session = useStore.getState().documentSession!
+      useStore.setState({ documentSession: { ...session, dirty: true }, isDirty: true })
+
+      dispatchHostMessage({
+        type: 'EXTERNAL_FILE_CHANGE',
+        sessionId: 'session-1',
+        baseRevision: 2,
+        eventId: 'same-content-echo',
+        payload: { content: 'flowchart TD\n  A[Local]', hostRevision: 2 },
+      })
+
+      expect(useStore.getState().documentSession).toMatchObject({
+        baseHostRevision: 2,
+        conflict: null,
+        dirty: false,
+      })
+    })
+
     it('adopts a valid external revision when the session is clean', () => {
       const nodeA = makeFlowNode('A')
       vi.mocked(parseMermaidFlowchart).mockReturnValue(makeParseSuccess([nodeA]))
@@ -390,7 +412,7 @@ describe('App.tsx — EXTERNAL_FILE_CHANGE and LOAD message handling', () => {
           'node:stale': { x: 900, y: 900 },
         },
         edges: {
-          'edge:e-A-B': { routeMode: 'orthogonal', waypoints: [{ x: 150, y: 80 }] },
+          'edge:e1': { routeMode: 'orthogonal', waypoints: [{ x: 150, y: 80 }] },
           'edge:stale': { routeMode: 'curved' },
         },
         constraints: [],
@@ -421,7 +443,7 @@ describe('App.tsx — EXTERNAL_FILE_CHANGE and LOAD message handling', () => {
         position: { x: 40, y: 50 }, width: 300, height: 240,
         data: { isLane: true },
       })
-      expect(state.edges.find(candidate => candidate.id === 'e-A-B')?.data).toMatchObject({
+      expect(state.edges.find(candidate => candidate.id === 'e1')?.data).toMatchObject({
         routeMode: 'orthogonal', waypoints: [{ x: 150, y: 80 }],
       })
       expect(state.viewportToRestore).toEqual(layout.viewport)

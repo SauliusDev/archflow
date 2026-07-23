@@ -74,6 +74,9 @@ export function getShapeDefinition(id: string): ShapeDefinition | undefined {
 }
 
 export function getShapeDefinitionForNode(shape: NodeShape, mermaidShape?: string): ShapeDefinition | undefined {
-  if (mermaidShape) return definitionsByMermaidShape.get(mermaidShape)
+  if (mermaidShape) {
+    const generalizedDefinition = definitionsByMermaidShape.get(mermaidShape)
+    if (generalizedDefinition) return generalizedDefinition
+  }
   return allShapeDefinitions.find(definition => definition.shape === shape && !definition.mermaidShape)
 }

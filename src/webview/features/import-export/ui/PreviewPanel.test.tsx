@@ -80,6 +80,26 @@ describe('PreviewPanel', () => {
     )
   })
 
+  it('does not render a phantom node from a stale flowchart style directive', async () => {
+    vi.mocked(useStore).mockImplementation((selector: (s: unknown) => unknown) =>
+      selector({
+        codeSource: 'flowchart TD\n  A[Alpha]\n  style Database stroke-width:3px',
+        documentSession: {
+          family: 'flowchart',
+          projection: { model: { nodes: [{ id: 'A' }], edges: [] } },
+          workingRevision: 1,
+        },
+      })
+    )
+
+    await act(async () => { render(<PreviewPanel />) })
+
+    expect(vi.mocked(mermaid).render).toHaveBeenCalledWith(
+      expect.stringMatching(/^mermaid-svg-/),
+      'flowchart TD\n  A[Alpha]\n'
+    )
+  })
+
   it('updates SVG container innerHTML on successful render', async () => {
     vi.mocked(mermaid).render = vi.fn().mockResolvedValue({ svg: '<svg id="test">test</svg>' })
     let container!: HTMLElement

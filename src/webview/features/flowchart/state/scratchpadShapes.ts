@@ -27,3 +27,13 @@ export function addScratchpadShape(id: string): string[] {
   }
   return next
 }
+
+export function removeScratchpadShape(id: string): string[] {
+  const next = readScratchpadShapeIds().filter(shapeId => shapeId !== id)
+  try {
+    storage()?.setItem(STORAGE_KEY, JSON.stringify(next))
+  } catch {
+    // The palette remains usable when webview storage is unavailable.
+  }
+  return next
+}

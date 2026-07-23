@@ -62,6 +62,19 @@ function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
+/** Returns the original endpoint declarations when an edge is safely rewritable. */
+function inlineEdgeEndpoints(text: string, source: string, target: string): { indent: string; source: string; target: string; trailing: string } | undefined {
+  // Keep declarations such as `Database[(Database)]` intact when an edge is
+  // restyled. Replacing the whole line with bare ids turns declared nodes into
+  // references, which can make later references ambiguous.
+  const declaration = '(?:@\\{[^\\r\\n]*?\\}|\\(\\[[^\\r\\n]*?\\]\\)|\\(\\([^\\r\\n]*?\\)\\)|\\[\\([^\\r\\n]*?\\)\\]|\\{\\{[^\\r\\n]*?\\}\\}|\\[[^\\r\\n]*?\\]|\\([^\\r\\n]*?\\)|\\{[^\\r\\n]*?\\})?'
+  const sourceEndpoint = `${escapeRegex(source)}${declaration}`
+  const targetEndpoint = `${escapeRegex(target)}${declaration}`
+  const match = new RegExp(`^(\\s*)(${sourceEndpoint})\\s+.+?\\s+(${targetEndpoint})(\\s*)$`).exec(text)
+  if (!match) return undefined
+  return { indent: match[1], source: match[2], target: match[3], trailing: match[4] }
+}
+
 function lineSpans(source: string): Array<{ text: string; start: number; end: number; fullEnd: number }> {
   const spans: Array<{ text: string; start: number; end: number; fullEnd: number }> = []
   const matcher = /.*(?:\r\n|\n|\r|$)/g
@@ -235,10 +248,13 @@ function buildModel(source: string): FlowchartAdapterModel {
       return (span.text.includes(node.data.label) || (node.data.label.includes('\n') && /<br\s*\/?\s*>/i.test(span.text)))
         && inlineDeclaration.test(trimmed)
     })
-    if (candidates.length !== 1) {
+    // Referenced-only Mermaid nodes have no local declaration to edit, but
+    // are still safe to render. Only competing declarations are ambiguous.
+    if (candidates.length > 1) {
       ambiguousNodeIds.add(node.id)
       continue
     }
+    if (candidates.length === 0) continue
     const span = candidates[0]
     // Whole-line mutations (delete and color directives) are unsafe for an
     // inline declaration because they can also rewrite its edge or neighbour.
@@ -727,6 +743,23 @@ export function issueFlowchartOperation(
   if (operation.kind === 'delete-edge') {
     const owned = model.edgeLines.get(operation.id)
     if (!owned) throw new SemanticValidationError(`Edge ${operation.id} has no stable source handle`)
+    const edge = model.edges.find(candidate => candidate.id === operation.id)
+    const endpoints = edge ? inlineEdgeEndpoints(owned.text, edge.source, edge.target) : undefined
+    const declarations = endpoints && edge
+      ? [
+          endpoints.source !== edge.source && !model.nodeLines.has(edge.source) ? endpoints.source : undefined,
+          endpoints.target !== edge.target && !model.nodeLines.has(edge.target) ? endpoints.target : undefined,
+        ].filter((endpoint): endpoint is string => endpoint !== undefined)
+      : []
+    if (declarations.length > 0) {
+      const newline = concrete.source.slice(owned.range.end, owned.fullLineRange.end)
+      const text = declarations.map(declaration => `${endpoints!.indent}${declaration}`).join(newline)
+      return [{
+        kind: 'replace', range: owned.fullLineRange,
+        text: `${text}${newline}`,
+        expectedText: concrete.source.slice(owned.fullLineRange.start, owned.fullLineRange.end), expectedRevision: concrete.revision,
+      }]
+    }
     return [{ kind: 'delete', range: owned.fullLineRange, expectedText: concrete.source.slice(owned.fullLineRange.start, owned.fullLineRange.end), expectedRevision: concrete.revision }]
   }
 
@@ -735,10 +768,20 @@ export function issueFlowchartOperation(
     const owned = model.edgeLines.get(operation.id)
     if (!edge || !owned) throw new SemanticValidationError(`Edge ${operation.id} has no stable source handle`)
     if (operation.label) validateLabel(operation.label)
-    const indent = owned.text.match(/^\s*/)?.[0] ?? ''
+    const inlineEndpoints = inlineEdgeEndpoints(owned.text, edge.source, edge.target)
+    const indent = inlineEndpoints?.indent ?? owned.text.match(/^\s*/)?.[0] ?? ''
     const connector = edgeConnectors[operation.style ?? edge.data?.style ?? 'arrow']
     const label = 'label' in operation ? operation.label : edge.data?.label
-    const text = `${indent}${operation.source ?? edge.source} ${edge.id}@${connector}${label ? `|${label}|` : ''} ${operation.target ?? edge.target}`
+    // A moved endpoint needs its new id, but the endpoint that stayed put may
+    // be its only inline declaration. Keep that declaration rather than
+    // silently turning it into a bare reference.
+    const source = operation.source === undefined || operation.source === edge.source
+      ? inlineEndpoints?.source ?? edge.source
+      : operation.source
+    const target = operation.target === undefined || operation.target === edge.target
+      ? inlineEndpoints?.target ?? edge.target
+      : operation.target
+    const text = `${indent}${source} ${edge.id}@${connector}${label ? `|${label}|` : ''} ${target}${inlineEndpoints?.trailing ?? ''}`
     return [{ kind: 'replace', range: owned.range, text, expectedText: owned.text, expectedRevision: concrete.revision }]
   }
 

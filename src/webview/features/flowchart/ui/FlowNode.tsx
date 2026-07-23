@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Handle, Position, NodeResizer } from '@xyflow/react'
 import type { NodeProps, Node, ResizeParams } from '@xyflow/react'
 import type { FlowNodeData } from '../state/types'
@@ -41,6 +41,27 @@ export default function FlowNode({
   const pendingConnectTargetId = useStore(s => s.pendingConnectTargetId)
   const [editingLabel, setEditingLabel] = useState<string | null>(null)
   const isEscapingRef = useRef(false)
+  const lastLabelRef = useRef(label)
+  const nodeContentRef = useRef<HTMLDivElement>(null)
+  const editorRef = useRef<HTMLTextAreaElement>(null)
+
+  // The inspector can update this node while its inline editor is open. Keep
+  // the native textarea current without committing its local draft per keystroke.
+  useEffect(() => {
+    if (lastLabelRef.current === label) return
+    lastLabelRef.current = label
+    if (editingLabel !== null) setEditingLabel(label)
+  }, [editingLabel, label])
+
+  // Keep the textarea itself as the flex item so the node's chosen vertical
+  // alignment applies to the edit state as well as the displayed label.
+  useLayoutEffect(() => {
+    if (editingLabel === null || !editorRef.current) return
+    const textarea = editorRef.current
+    textarea.style.height = 'auto'
+    const maxHeight = nodeContentRef.current?.clientHeight ?? textarea.scrollHeight
+    textarea.style.height = `${Math.min(textarea.scrollHeight, maxHeight)}px`
+  }, [editingLabel])
 
   const handleResizeEnd = useCallback((_: unknown, params: ResizeParams) => {
     resizeNode(id, { width: params.width, height: params.height }, { x: params.x, y: params.y })
@@ -66,9 +87,9 @@ export default function FlowNode({
   }
 
   function handleEditKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>): void {
-    e.stopPropagation()
     if (e.key === 'Escape') {
       e.preventDefault()
+      e.stopPropagation()
       isEscapingRef.current = true
       setEditingLabel(null)
     }
@@ -88,6 +109,7 @@ export default function FlowNode({
 
   return (
     <div
+      ref={nodeContentRef}
       className={[
         'flow-node',
         `flow-node--${shape}`,
@@ -112,12 +134,15 @@ export default function FlowNode({
       <ShapeGraphic shape={shape} mermaidShape={data.mermaidShape} />
       {editingLabel !== null && !isCanvasLocked ? (
         <textarea
-          className="flow-node__label-input flow-node__label-input--plain nodrag"
+          ref={editorRef}
+          className={`flow-node__label-input flow-node__label-input--plain flow-node__label-input--horizontal-${textHorizontalAlign} nodrag nopan nowheel nokey`}
           aria-label="Node text"
           value={editingLabel}
           onChange={e => setEditingLabel(e.target.value)}
           onKeyDown={handleEditKeyDown}
           onBlur={commitEdit}
+          onPointerDown={preventNodeDrag}
+          rows={1}
           autoFocus
         />
       ) : (
@@ -149,6 +174,7 @@ export default function FlowNode({
           id={`${id}-${side}`}
           aria-label={`Assign edge endpoint to ${side} side`}
           className="flow-node__handle nodrag"
+          data-attachment-side={side}
           role="button"
           tabIndex={0}
           onPointerDown={preventNodeDrag}

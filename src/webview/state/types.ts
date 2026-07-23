@@ -35,18 +35,18 @@ export type PendingConnect =
     fixedNodeId: string;
     fixedSide?: EdgeAttachmentSide;
     cursor?: { x: number; y: number };
-    /** Ignore the release that activates reassignment; the next click chooses its target. */
-    awaitingInitialRelease?: boolean;
   };
 
 export interface DocumentSlice {
   documentSession: DocumentSession | null;
   codeSource: string;
   classDiagram: ClassAdapterModel | null;
+  recoverySnapshot: { session: DocumentSession; nodes: Node<FlowNodeData>[]; edges: Edge<FlowEdgeData>[] } | null;
   isDirty: boolean;
   initializeDocumentSession: (session: DocumentSession) => void;
   setInspectorVisible: (visible: boolean) => void;
   applyCodeSource: (source: string) => void;
+  restoreLastValidDiagram: () => void;
   prepareDocumentSave: (
     content: string,
     layout: LayoutStateV2,
@@ -151,6 +151,7 @@ export interface FlowchartSlice {
     sourceHandle?: string | null;
     targetHandle?: string | null;
     sourceSide?: EdgeAttachmentSide;
+    targetSide?: EdgeAttachmentSide;
   }, routeMode?: NewEdgeRouteMode) => void;
   setEdgeStyle: (id: string, style: EdgeStyle) => void;
   setEdgeRouteMode: (id: string, routeMode: EdgeRouteMode) => void;

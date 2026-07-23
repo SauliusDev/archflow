@@ -203,7 +203,6 @@ export default function FlowEdge({
       fixedSide: movingSource ? data?.targetSide : data?.sourceSide,
       ...(event ? {
         cursor: { x: event.clientX, y: event.clientY },
-        awaitingInitialRelease: true,
       } : {}),
     })
   }, [data?.sourceSide, data?.targetSide, id, setPendingConnect, source, target])

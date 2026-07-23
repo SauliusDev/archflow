@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useStore } from '@/state/createStore'
-import { FILL_SWATCHES, type NodeShape } from '@/features/flowchart'
+import { FILL_SWATCHES, STROKE_SWATCHES, TEXT_SWATCHES, ShapeGraphic, type NodeShape } from '@/features/flowchart'
 import {
   FormatAlignCenterIcon,
   FormatAlignLeftIcon,
@@ -9,7 +9,6 @@ import {
   VerticalAlignCenterIcon,
   VerticalAlignTopIcon,
 } from '@/components/icons'
-import { ShapeGraphic } from '@/features/flowchart/ui/ShapeGraphic'
 
 const SHAPES: Array<{ value: NodeShape; label: string }> = [
   { value: 'rectangle', label: 'Rectangle' },
@@ -37,21 +36,27 @@ const VERTICAL_ALIGNMENT_ICONS = {
   bottom: VerticalAlignBottomIcon,
 } as const
 
-interface LinkedColorInputProps {
+interface ColorChannelProps {
   label: 'Fill' | 'Border' | 'Text'
   color?: string
+  swatches: readonly string[]
   disabled: boolean
   onChange: (color: string) => void
 }
 
-function LinkedColorInput({ label, color, disabled, onChange }: LinkedColorInputProps): React.JSX.Element {
+function ColorChannel({ label, color, swatches, disabled, onChange }: ColorChannelProps): React.JSX.Element {
   const nativeColor = color ?? (label === 'Fill' ? '#ffffff' : '#000000')
 
   return (
-    <label className="canvas-node-inspector__color-input">
-      <span>{label}</span>
-      <input aria-label={`${label} color`} type="color" value={nativeColor} disabled={disabled} onChange={event => onChange(event.currentTarget.value)} />
-    </label>
+    <section className="canvas-node-inspector__color-channel" aria-label={`${label} color controls`}>
+      <span className="canvas-node-inspector__color-label">{label} color</span>
+      <input className="canvas-node-inspector__color-picker" aria-label={`${label} color`} type="color" value={nativeColor} disabled={disabled} onChange={event => onChange(event.currentTarget.value)} />
+      <div className="canvas-node-inspector__swatches" role="group" aria-label={`${label} color swatches`}>
+        {swatches.map(swatch => (
+          <button key={swatch} className="canvas-node-inspector__swatch" type="button" style={{ backgroundColor: swatch }} aria-label={`${label} color ${swatch}`} aria-pressed={color === swatch} title={swatch} disabled={disabled} onClick={() => onChange(swatch)} />
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -80,9 +85,12 @@ export default function CanvasNodeInspector(): React.JSX.Element | null {
   const updateColor = (colors: { fillColor?: string; strokeColor?: string; textColor?: string }): void => {
     if (!colorEditingDisabled) updateNodeColors(id, colors)
   }
-  const updateLinkedColors = (color: string): void => updateColor({ fillColor: color, strokeColor: color, textColor: color })
   const updateStrokeWidth = (strokeWidth: typeof STROKE_WIDTHS[number]): void => {
     if (!colorEditingDisabled) updateNodeStrokeWidth(id, strokeWidth)
+  }
+  const updateLabel = (nextLabel: string): void => {
+    setLabel(nextLabel)
+    updateNodeLabel(id, nextLabel)
   }
 
   return (
@@ -94,7 +102,7 @@ export default function CanvasNodeInspector(): React.JSX.Element | null {
 
       <label className="canvas-node-inspector__field">
         <span>Node text</span>
-        <textarea aria-label="Node text" value={label} disabled={isLocked} rows={3} onChange={event => setLabel(event.currentTarget.value)} onBlur={() => updateNodeLabel(id, label)} />
+        <textarea aria-label="Node text" value={label} disabled={isLocked} rows={3} onChange={event => updateLabel(event.currentTarget.value)} />
       </label>
 
       <fieldset className="canvas-node-inspector__group">
@@ -139,16 +147,9 @@ export default function CanvasNodeInspector(): React.JSX.Element | null {
       </fieldset>
 
       <div className="canvas-node-inspector__colors" aria-label="Node colors">
-        <div className="canvas-node-inspector__linked-color-inputs" aria-label="Linked node color inputs">
-          <LinkedColorInput label="Fill" color={data.fillColor} disabled={colorEditingDisabled} onChange={updateLinkedColors} />
-          <LinkedColorInput label="Border" color={data.strokeColor} disabled={colorEditingDisabled} onChange={updateLinkedColors} />
-          <LinkedColorInput label="Text" color={data.textColor} disabled={colorEditingDisabled} onChange={updateLinkedColors} />
-        </div>
-        <div className="canvas-node-inspector__swatches" role="group" aria-label="Linked color swatches">
-          {FILL_SWATCHES.map(swatch => (
-            <button key={swatch} className="canvas-node-inspector__swatch" type="button" style={{ backgroundColor: swatch }} aria-label={`Set all colors to ${swatch}`} aria-pressed={data.fillColor === swatch && data.strokeColor === swatch && data.textColor === swatch} title={swatch} disabled={colorEditingDisabled} onClick={() => updateLinkedColors(swatch)} />
-          ))}
-        </div>
+        <ColorChannel label="Fill" color={data.fillColor} swatches={FILL_SWATCHES} disabled={colorEditingDisabled} onChange={fillColor => updateColor({ fillColor })} />
+        <ColorChannel label="Border" color={data.strokeColor} swatches={STROKE_SWATCHES} disabled={colorEditingDisabled} onChange={strokeColor => updateColor({ strokeColor })} />
+        <ColorChannel label="Text" color={data.textColor} swatches={TEXT_SWATCHES} disabled={colorEditingDisabled} onChange={textColor => updateColor({ textColor })} />
         <div className="canvas-node-inspector__color-actions">
           <button type="button" aria-label="Clear fill color" disabled={colorEditingDisabled} onClick={() => updateColor({ fillColor: undefined })}>Clear fill</button>
           <button type="button" aria-label="Reset custom colors to default" disabled={colorEditingDisabled} onClick={() => updateColor({ fillColor: undefined, strokeColor: undefined, textColor: undefined })}>Reset colors</button>

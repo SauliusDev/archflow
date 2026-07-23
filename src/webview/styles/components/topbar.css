@@ -12,7 +12,7 @@
 }
 
 .app[data-layout-style='modern'] .topbar {
-  background: transparent;
+  background: var(--mv-transparent);
   border: 0;
   border-radius: 0;
   box-shadow: none;

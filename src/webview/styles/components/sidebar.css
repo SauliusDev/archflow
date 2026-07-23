@@ -78,7 +78,7 @@
   padding: 0;
   border: 0;
   border-radius: var(--mv-r-sm);
-  background: transparent;
+  background: var(--mv-transparent);
   color: var(--mv-text-secondary);
   cursor: pointer;
 }

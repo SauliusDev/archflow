@@ -36,10 +36,10 @@ function fallbackReason(): string | null {
 
 export function useHostBridge(transport: HostTransport = vscodeTransport): HostBridgeState {
   const [autoSave, setAutoSaveState] = useState(true)
-  const [smartRouting, setSmartRoutingState] = useState(true)
-  const [snapToGrid, setSnapToGridState] = useState(true)
+  const [smartRouting, setSmartRoutingState] = useState(false)
+  const [snapToGrid, setSnapToGridState] = useState(false)
   const [newEdgeRouteMode, setNewEdgeRouteModeState] = useState<NewEdgeRouteMode>('curved')
-  const [layoutStyle, setLayoutStyleState] = useState<LayoutStyle>('classic')
+  const [layoutStyle, setLayoutStyleState] = useState<LayoutStyle>('modern')
   const [diagramFamily, setDiagramFamily] = useState<DiagramFamily>('flowchart')
   const pendingPreferenceRequests = useRef<Partial<Record<SetPreferencePayload['preference'], string>>>({})
   const storeFallbackReason = useStore(state => state.documentSession?.projection.diagnostics
