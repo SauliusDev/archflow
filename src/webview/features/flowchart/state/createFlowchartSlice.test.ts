@@ -274,11 +274,17 @@ describe('createFlowchartSlice edge defaults', () => {
 
     useStore.setState({
       edges: [makeEdge('e-b-c', 'b', 'c', {
-        data: { style: 'arrow', routeMode: 'curved', sourceSide: 'right', targetSide: 'left' },
+        data: {
+          style: 'arrow',
+          waypoints: [{ x: 40, y: 60 }],
+          sourceSide: 'right',
+          targetSide: 'left',
+          routeMode: 'orthogonal',
+        },
       })],
       history: { past: [], future: [] },
     })
-    useStore.getState().setAllEdgeRouteModes('curved')
+    useStore.getState().setAllEdgeRouteModes('orthogonal')
     expect(useStore.getState().history.past).toHaveLength(0)
   })
 
