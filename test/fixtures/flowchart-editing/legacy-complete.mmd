@@ -1,0 +1,17 @@
+flowchart LR
+  A[Rectangle]
+  B(Rounded)
+  C([Pill])
+  D{Diamond}
+  E((Circle))
+  F{{Hexagon}}
+  G[(Cylinder)]
+  subgraph OUTER [Outer Group]
+    subgraph INNER [Inner Group]
+      H[Child]
+    end
+  end
+  A --> B
+  A -.-> B
+  A ==> B
+  A --- B

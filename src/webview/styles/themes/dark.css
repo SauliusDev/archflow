@@ -1,0 +1,8 @@
+/* Dark theme — Flowforge v1 default
+ *
+ * All dark palette values are defined as :root defaults in variables.css.
+ * This file intentionally has no rule body.
+ *
+ * A [data-theme="dark"] override block may be added here in the future
+ * if adaptive.css introduces a competing theme that needs reverting.
+ */

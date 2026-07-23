@@ -1,0 +1,796 @@
+{
+  "schemaVersion": 1,
+  "mermaidVersion": "11.14.0",
+  "fixtures": [
+    {
+      "id": "flowchart-representative-subgraph",
+      "family": "flowchart",
+      "declaration": "flowchart",
+      "category": "representative",
+      "sourcePath": "flowchart/representative-subgraph.mmd",
+      "provenance": {
+        "kind": "offline-pack",
+        "path": "test/fixtures/mermaid-docs/flowchart/examples/095-subgraphs.mmd"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "8af2741f77e4425fb870f66ac183f18ad64f9fb89bb8d80f1b8a82d036e555eb",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "webview",
+        "extension-ui",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "contract",
+      "tags": [
+        "subgraph",
+        "repeated-edge-target"
+      ]
+    },
+    {
+      "id": "flowchart-swimlane-subgraph",
+      "family": "flowchart",
+      "declaration": "flowchart",
+      "category": "advanced-preservation",
+      "sourcePath": "flowchart/swimlane-subgraph.mmd",
+      "provenance": {
+        "kind": "offline-pack",
+        "path": "test/fixtures/mermaid-docs/swimlanes/examples/095-subgraphs.mmd"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "8af2741f77e4425fb870f66ac183f18ad64f9fb89bb8d80f1b8a82d036e555eb",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "webview",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "known-limitation",
+      "tags": [
+        "swimlane",
+        "subgraph",
+        "future-interaction"
+      ]
+    },
+    {
+      "id": "sequence-minimal",
+      "family": "sequence",
+      "declaration": "sequenceDiagram",
+      "category": "minimal",
+      "sourcePath": "sequence/minimal.mmd",
+      "provenance": {
+        "kind": "offline-pack",
+        "path": "test/fixtures/mermaid-docs/sequence/examples/001-sequence-diagrams.mmd"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "b2066a62d878a2b2b1ad49be0674b68d0fb78deed9c5def176cfcb2340403d25",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": []
+    },
+    {
+      "id": "zenuml-minimal",
+      "family": "zenuml",
+      "declaration": "zenuml",
+      "category": "minimal",
+      "sourcePath": "zenuml/minimal.mmd",
+      "provenance": {
+        "kind": "offline-pack",
+        "path": "test/fixtures/mermaid-docs/zenuml/examples/001-zenuml.mmd"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "7ce5c39b6c91ba039079e2464738dd34475749022216daa73bf0861091f21e8d",
+      "expected": {
+        "validation": "unsupported",
+        "render": "unsupported"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": []
+    },
+    {
+      "id": "class-representative",
+      "family": "class",
+      "declaration": "classDiagram",
+      "category": "representative",
+      "sourcePath": "class/representative.mmd",
+      "provenance": {
+        "kind": "offline-pack",
+        "path": "test/fixtures/mermaid-docs/class/examples/001-class-diagrams.mmd"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "01f53b9e79db0fe31e23e5b0bd74fde68bf38de3255c838d9effb67403ffb77b",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "frontmatter",
+        "members",
+        "relations"
+      ]
+    },
+    {
+      "id": "state-minimal",
+      "family": "state",
+      "declaration": "stateDiagram-v2",
+      "category": "minimal",
+      "sourcePath": "state/minimal.mmd",
+      "provenance": {
+        "kind": "offline-pack",
+        "path": "test/fixtures/mermaid-docs/state/examples/001-state-diagrams.mmd"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "fc35188de9f919aa10f7bb302574c3bcdc2fc74a54434a5bc4ee33c57cff8d64",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "frontmatter"
+      ]
+    },
+    {
+      "id": "er-minimal",
+      "family": "er",
+      "declaration": "erDiagram",
+      "category": "minimal",
+      "sourcePath": "er/minimal.mmd",
+      "provenance": {
+        "kind": "offline-pack",
+        "path": "test/fixtures/mermaid-docs/entity-relationship/examples/001-entity-relationship-diagrams.mmd"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "973dfeffadbed6ce882050ada2e9747a1049e0d21a31f41ab0123313bb143e72",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "frontmatter",
+        "cardinality"
+      ]
+    },
+    {
+      "id": "architecture-representative",
+      "family": "architecture",
+      "declaration": "architecture-beta",
+      "category": "representative",
+      "sourcePath": "architecture/representative.mmd",
+      "provenance": {
+        "kind": "offline-pack",
+        "path": "test/fixtures/mermaid-docs/architecture/examples/001-example.mmd"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "bc2e0b86f311454480f0bc4d1ccdd5dcc7c268555254f0c94aa62226b488ea65",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "groups",
+        "services",
+        "ports"
+      ]
+    },
+    {
+      "id": "c4-representative",
+      "family": "c4",
+      "declaration": "C4Context",
+      "category": "representative",
+      "sourcePath": "c4/representative.mmd",
+      "provenance": {
+        "kind": "offline-pack",
+        "path": "test/fixtures/mermaid-docs/c4/examples/002-c4-system-context-diagram-c4context.mmd"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "675a5ac04170cf0d10781e5dfc08d969f8572782e7a6b0813a994e1e30f80e3f",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "boundaries",
+        "relationships",
+        "styles"
+      ]
+    },
+    {
+      "id": "unsupported-gantt",
+      "family": "unsupported",
+      "declaration": "gantt",
+      "category": "unsupported",
+      "sourcePath": "unsupported/gantt.mmd",
+      "provenance": {
+        "kind": "flowforge-authored",
+        "path": "test/fixtures/multi-diagram/manifest.json"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "79e11175f250a66f832d0fdcf05ed8c765974be2f43e37ac95daf18022979ddd",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "extension-ui",
+        "parser-research"
+      ],
+      "classification": "contract",
+      "tags": [
+        "text-editor-fallback"
+      ]
+    },
+    {
+      "id": "malformed-broken-flowchart",
+      "family": "malformed",
+      "declaration": "flowchart",
+      "category": "malformed",
+      "sourcePath": "malformed/broken-flowchart.mmd",
+      "provenance": {
+        "kind": "flowforge-authored",
+        "path": "test/fixtures/multi-diagram/manifest.json"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "97fefe7fba423ca104c3f75e6b7df84ee3cf62ac0e1de8d1dc25224dd5560c6e",
+      "expected": {
+        "validation": "fail",
+        "render": "fail"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "webview",
+        "parser-research"
+      ],
+      "classification": "known-limitation",
+      "tags": [
+        "malformed-header"
+      ]
+    },
+    {
+      "id": "malformed-comment-only",
+      "family": "malformed",
+      "declaration": "comment-only",
+      "category": "malformed",
+      "sourcePath": "malformed/comment-only.mmd",
+      "provenance": {
+        "kind": "flowforge-authored",
+        "path": "test/fixtures/multi-diagram/manifest.json"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "ddeae18303bba4bfb14d9f3d34fca137eaa51b93c308b69e30cc0e66cff7dcae",
+      "expected": {
+        "validation": "unsupported",
+        "render": "unsupported"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "parser-research"
+      ],
+      "classification": "contract",
+      "tags": [
+        "comment-only"
+      ]
+    },
+    {
+      "id": "malformed-empty",
+      "family": "malformed",
+      "declaration": "empty",
+      "category": "malformed",
+      "sourcePath": "malformed/empty.mmd",
+      "provenance": {
+        "kind": "flowforge-authored",
+        "path": "test/fixtures/multi-diagram/manifest.json"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected": {
+        "validation": "unsupported",
+        "render": "unsupported"
+      },
+      "consumingLayers": [
+        "corpus",
+        "host",
+        "parser-research"
+      ],
+      "classification": "contract",
+      "tags": [
+        "empty"
+      ]
+    },
+    {
+      "id": "stress-flowchart-medium",
+      "family": "flowchart",
+      "declaration": "flowchart",
+      "category": "stress",
+      "sourcePath": "stress/flowchart-medium.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "b88c4223bab54eb04d6eca4c85d0daf145d3fc0e9b92fca13a22176e9dff8ac9",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "medium"
+      ]
+    },
+    {
+      "id": "stress-flowchart-large",
+      "family": "flowchart",
+      "declaration": "flowchart",
+      "category": "stress",
+      "sourcePath": "stress/flowchart-large.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "7dbd3e9e83118a4d7ac2d54e30a6118539a611866899081001067375855a5e8e",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "large"
+      ]
+    },
+    {
+      "id": "stress-sequence-medium",
+      "family": "sequence",
+      "declaration": "sequenceDiagram",
+      "category": "stress",
+      "sourcePath": "stress/sequence-medium.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "548a027ffe586e94affcf59a1d873204d6bd781cab02487b13fad4c1d0a775fd",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "medium"
+      ]
+    },
+    {
+      "id": "stress-sequence-large",
+      "family": "sequence",
+      "declaration": "sequenceDiagram",
+      "category": "stress",
+      "sourcePath": "stress/sequence-large.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "ad8c6330b42d7f2090ed3626e754f7d871536bd79252ab62344af233aeaf5679",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "large"
+      ]
+    },
+    {
+      "id": "stress-zenuml-medium",
+      "family": "zenuml",
+      "declaration": "zenuml",
+      "category": "stress",
+      "sourcePath": "stress/zenuml-medium.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "19e1441c7b7779823ab5b78f4b96e16b6186c442c815abce1dea3b95af6ffde3",
+      "expected": {
+        "validation": "unsupported",
+        "render": "unsupported"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "medium"
+      ]
+    },
+    {
+      "id": "stress-zenuml-large",
+      "family": "zenuml",
+      "declaration": "zenuml",
+      "category": "stress",
+      "sourcePath": "stress/zenuml-large.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "ecf5a7ab4be3dcb1cc8d47e9337b75c6668e2216f9b99e0896fe49b8e14748dd",
+      "expected": {
+        "validation": "unsupported",
+        "render": "unsupported"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "large"
+      ]
+    },
+    {
+      "id": "stress-class-medium",
+      "family": "class",
+      "declaration": "classDiagram",
+      "category": "stress",
+      "sourcePath": "stress/class-medium.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "af39aa9cdaffd27627bb48998553c04b57908818cd85a62af10b8f1f7d3e6f9a",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "medium"
+      ]
+    },
+    {
+      "id": "stress-class-large",
+      "family": "class",
+      "declaration": "classDiagram",
+      "category": "stress",
+      "sourcePath": "stress/class-large.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "3f87c90c5b0dc8455e21580b8fda231ef484dcd3c3ee484a225f185934730efc",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "large"
+      ]
+    },
+    {
+      "id": "stress-state-medium",
+      "family": "state",
+      "declaration": "stateDiagram-v2",
+      "category": "stress",
+      "sourcePath": "stress/state-medium.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "a1000a49e2b5da8235a69884e1f3c5807a71baee7ce4f932eaf04b5e73d38f3a",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "medium"
+      ]
+    },
+    {
+      "id": "stress-state-large",
+      "family": "state",
+      "declaration": "stateDiagram-v2",
+      "category": "stress",
+      "sourcePath": "stress/state-large.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "484592fc94ea80cb1a202106d4148fd4b2025dadb9d6efb82a08fd94b5d54f96",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "large"
+      ]
+    },
+    {
+      "id": "stress-er-medium",
+      "family": "er",
+      "declaration": "erDiagram",
+      "category": "stress",
+      "sourcePath": "stress/er-medium.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "b6812c2f535e842c3b1743a90ce9cfe5c63bc1996bebd643acaf531d78a237fb",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "medium"
+      ]
+    },
+    {
+      "id": "stress-er-large",
+      "family": "er",
+      "declaration": "erDiagram",
+      "category": "stress",
+      "sourcePath": "stress/er-large.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "394b6b299a9f93eb0bb76281f90b522b473ed5b3d9553cc37e297679bd64bbca",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "large"
+      ]
+    },
+    {
+      "id": "stress-architecture-medium",
+      "family": "architecture",
+      "declaration": "architecture-beta",
+      "category": "stress",
+      "sourcePath": "stress/architecture-medium.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "f59879c61d8b80c29d2f55bc0e0f57c37345cfc76c100e9b13d3b57f96b75f6d",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "medium"
+      ]
+    },
+    {
+      "id": "stress-architecture-large",
+      "family": "architecture",
+      "declaration": "architecture-beta",
+      "category": "stress",
+      "sourcePath": "stress/architecture-large.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "a1ce5d7614afadc5da34581990c562982227f73ef1a00121837e168afa95ad24",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "large"
+      ]
+    },
+    {
+      "id": "stress-c4-medium",
+      "family": "c4",
+      "declaration": "C4Context",
+      "category": "stress",
+      "sourcePath": "stress/c4-medium.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "4dffabb96d342bf5f090f37d7aeac39b0fde5589c5c2a5bdbb1c52035ede7ac8",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "medium"
+      ]
+    },
+    {
+      "id": "stress-c4-large",
+      "family": "c4",
+      "declaration": "C4Context",
+      "category": "stress",
+      "sourcePath": "stress/c4-large.mmd",
+      "provenance": {
+        "kind": "generated",
+        "path": "scripts/multi-diagram/generate-stress.mjs"
+      },
+      "mermaidVersion": "11.14.0",
+      "sha256": "7fcbcbc6c3b60f14828e3071e248bf2b4fcef10847eca4f1e770d9b2c6de4dff",
+      "expected": {
+        "validation": "pass",
+        "render": "pass"
+      },
+      "consumingLayers": [
+        "corpus",
+        "parser-research",
+        "benchmark"
+      ],
+      "classification": "future-target",
+      "tags": [
+        "stress",
+        "large"
+      ]
+    }
+  ]
+}

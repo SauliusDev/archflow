@@ -1,0 +1,12 @@
+# Publish only the compiled extension and files used by its manifest or listing.
+# Source, tests, tooling, local references, and generated development artifacts
+# remain in the Git repository but are excluded from the VSIX.
+**
+
+!out/extension.js
+!out/webview/**
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE
+!flowforge-icon.png

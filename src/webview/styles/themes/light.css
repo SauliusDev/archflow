@@ -1,0 +1,88 @@
+/* Light theme — Flowforge white palette
+ *
+ * Activated by App.tsx adding data-theme="light" to :root.
+ * Overrides the :root dark defaults from variables.css with a light palette.
+ * RULE: only override color tokens — spacing, radius, z-index inherit from :root.
+ */
+:root[data-theme="light"] {
+  /* ── FOUNDATION: Background Hierarchy ─────────────────────────────────── */
+  --mv-bg-deep:     #ffffff;
+  --mv-canvas-bg:   #ffffff;
+  --mv-bg-surface:  #f4f5f6;
+  --mv-bg-elevated: #ffffff;
+  --mv-bg-overlay:  #f0f1f2;
+  --mv-bg-hover:    rgba(0, 0, 0, 0.05);
+  --mv-glass-bg:       rgba(248, 249, 250, 0.92);
+  --mv-glass-bg-heavy: rgba(248, 249, 250, 0.96);
+  --mv-backdrop: rgba(0, 0, 0, 0.30);
+  --mv-switch-thumb: #ffffff;
+
+  /* ── FOUNDATION: Text Hierarchy ───────────────────────────────────────── */
+  --mv-text-bright:    #1a1a1a;
+  --mv-text-primary:   #3d3d3d;
+  --mv-text-secondary: #6b6b6b;
+  --mv-text-dim:       #a8a8a8;
+  --mv-brand-flowforge: #004baf;
+
+  /* ── FOUNDATION: Accent System ────────────────────────────────────────── */
+  --mv-accent:     #2479a4;
+  --mv-accent-dim: rgba(36, 121, 164, 0.12);
+  --mv-accent-mid: rgba(36, 121, 164, 0.28);
+
+  /* ── FOUNDATION: Border Hierarchy ─────────────────────────────────────── */
+  --mv-border:       #e0e1e3;
+  --mv-border-light: #d2d4d6;
+  --mv-border-focus: #2479a4;
+
+  /* ── FOUNDATION: Status Colors ────────────────────────────────────────── */
+  --mv-green:  #2e9e5b;
+  --mv-yellow: #b8860b;
+  --mv-red:    #d1453b;
+  --mv-danger-bg: rgba(209, 69, 59, 0.12);
+
+  /* ── FOUNDATION: Syntax Highlighting (code panel) ─────────────────────── */
+  --mv-syntax-keyword:    #cf222e;
+  --mv-syntax-string:     #0a3069;
+  --mv-syntax-function:   #8250df;
+  --mv-syntax-identifier: #953800;
+  --mv-syntax-comment:    #6e7781;
+  --mv-syntax-tag:        #116329;
+  --mv-syntax-plain:      #24292f;
+
+  /* ── COMPONENT: Node ───────────────────────────────────────────────────── */
+  --mv-node-fill:     #ffffff;
+  --mv-node-stroke:   #cbcdd0;
+  --mv-node-text:     #1a1a1a;
+  --mv-node-selected: #2479a4;
+
+  /* ── COMPONENT: Node Color Presets (8 swatches) ─────────────────────────── */
+  --mv-node-color-1: #ffffff;   /* Default white       */
+  --mv-node-color-2: #e7f0fb;   /* Sky blue            */
+  --mv-node-color-3: #e6f5ec;   /* Mint green          */
+  --mv-node-color-4: #f3e9f7;   /* Lavender            */
+  --mv-node-color-5: #fbeee2;   /* Peach               */
+  --mv-node-color-6: #f7f5e2;   /* Pale olive          */
+  --mv-node-color-7: #e2f5f4;   /* Aqua                */
+  --mv-node-color-8: #fbe7ec;   /* Blush               */
+
+  /* ── COMPONENT: Edge ───────────────────────────────────────────────────── */
+  --mv-edge-stroke:   #9ba0a5;
+  --mv-edge-selected: #2479a4;
+
+  /* ── COMPONENT: Subgraph ───────────────────────────────────────────────── */
+  --mv-subgraph-fill:   rgba(0, 0, 0, 0.025);
+  --mv-subgraph-stroke: #cbcdd0;
+  --mv-subgraph-header-bg: rgba(0, 0, 0, 0.02);
+
+  /* ── COMPONENT: Canvas Grid ────────────────────────────────────────────── */
+  --mv-dot-color: rgba(0, 0, 0, 0.07);
+
+  /* ── STATE: Interaction ────────────────────────────────────────────────── */
+  --mv-hover-bg: rgba(36, 121, 164, 0.08);
+
+  /* ── SHADOW SCALE (softer for light bg) ─────────────────────────────────── */
+  --mv-shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.12);
+  --mv-shadow-md:  0 4px 16px rgba(0, 0, 0, 0.14);
+  --mv-shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.18);
+  --mv-shadow-bar: 0 2px 12px rgba(0, 0, 0, 0.12);
+}

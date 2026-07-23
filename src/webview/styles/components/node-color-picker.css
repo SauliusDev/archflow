@@ -1,0 +1,108 @@
+.node-color-picker {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--mv-glass-bg-heavy);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r-md);
+  box-shadow: var(--mv-shadow-md);
+  z-index: var(--mv-z-color-picker);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 168px;
+}
+
+.node-color-picker__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.node-color-picker__native-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.node-color-picker__input {
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r-sm);
+  background: var(--mv-bg-overlay);
+  cursor: pointer;
+}
+
+.node-color-picker__value {
+  font-family: var(--mv-font-mono);
+  font-size: 11px;
+  color: var(--mv-text-secondary);
+}
+
+.node-color-picker__input[data-inherited] {
+  opacity: 0.65;
+}
+
+.node-color-picker__label {
+  font-size: 10px;
+  color: var(--mv-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 500;
+}
+
+.node-color-picker__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.node-color-picker__swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--mv-border);
+  cursor: pointer;
+  padding: 0;
+  transition: border-color 0.1s ease, box-shadow 0.1s ease;
+  flex-shrink: 0;
+}
+
+.node-color-picker__swatch:hover {
+  border-color: var(--mv-accent);
+}
+
+.node-color-picker__swatch--active {
+  border-color: var(--mv-accent);
+  box-shadow: 0 0 0 2px var(--mv-accent-mid);
+}
+
+.node-color-picker__reset {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--mv-border);
+  background: var(--mv-transparent);
+  color: var(--mv-text-secondary);
+  border-radius: var(--mv-r-sm);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--mv-font-ui);
+  text-align: center;
+  transition: background 0.1s ease, color 0.1s ease;
+  margin-top: 2px;
+}
+
+.node-color-picker__reset:hover {
+  background: var(--mv-bg-hover);
+  color: var(--mv-text-primary);
+}
+
+.node-color-picker :is(button, input):focus-visible {
+  outline: 2px solid var(--mv-border-focus);
+  outline-offset: 2px;
+}

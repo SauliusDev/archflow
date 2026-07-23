@@ -1,0 +1,70 @@
+/* Render-only class-diagram primitives. Every selector is scoped to avoid flowchart regressions. */
+.class-diagram {
+  --class-surface: var(--mv-node-fill);
+  --class-border: var(--mv-node-stroke);
+  --class-text: var(--mv-node-text);
+  --class-muted: var(--mv-text-secondary);
+  --class-edge: var(--mv-edge-stroke);
+  --class-namespace-fill: var(--mv-subgraph-fill);
+  --class-namespace-border: var(--mv-subgraph-stroke);
+}
+
+.class-node {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: var(--class-surface);
+  border: 1px solid var(--class-border);
+  border-radius: var(--mv-r-sm);
+  color: var(--class-text);
+  font-family: var(--mv-font-ui);
+  box-shadow: var(--mv-shadow-sm);
+}
+
+.class-node--selected { border-color: var(--mv-node-selected); box-shadow: 0 0 0 1px var(--mv-node-selected); }
+.class-node__header { display: grid; min-height: 52px; place-content: center; gap: 2px; padding: 6px 12px; text-align: center; }
+.class-node__annotation { color: var(--class-muted); font-size: 10px; font-style: italic; line-height: 1.2; }
+.class-node__name { font-size: 13px; line-height: 1.25; overflow-wrap: anywhere; }
+.class-node__compartment { border-top: 1px solid var(--class-border); padding: 2px 0; }
+.class-node__compartment-title { display: block; padding: 1px 10px; color: var(--class-muted); font-size: 9px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+.class-node__member { min-height: 22px; padding: 2px 10px; color: var(--class-text); font-family: var(--mv-font-mono); font-size: 11px; line-height: 18px; overflow-wrap: anywhere; }
+
+.namespace-node { display: flex; min-width: 220px; min-height: 140px; flex-direction: column; box-sizing: border-box; border: 1px dashed var(--class-namespace-border); border-radius: var(--mv-r-md); background: var(--class-namespace-fill); pointer-events: none; }
+.namespace-node--selected { border-color: var(--mv-accent); box-shadow: 0 0 0 1px var(--mv-accent-mid); }
+.namespace-node__header { padding: 6px 10px; border-bottom: 1px dashed var(--class-namespace-border); color: var(--class-muted); font-family: var(--mv-font-ui); font-size: 11px; font-weight: 600; pointer-events: auto; }
+.namespace-node__body { flex: 1; pointer-events: none; }
+
+.class-edge__line { fill: none; stroke: var(--class-edge); stroke-width: 1.5px; }
+.class-edge__line--dashed { stroke-dasharray: 5 3; }
+.class-edge__marker { fill: var(--mv-canvas-bg); stroke: var(--class-edge); stroke-width: 1.5px; }
+.class-edge__marker--diamond-filled { fill: var(--class-edge); }
+.class-edge__cardinality, .class-edge__label { fill: var(--class-text); font-family: var(--mv-font-ui); font-size: 11px; paint-order: stroke; stroke: var(--mv-canvas-bg); stroke-linejoin: round; stroke-width: 3px; }
+.class-edge__cardinality { font-family: var(--mv-font-mono); }
+
+.class-canvas { display: grid; min-height: 100%; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); grid-template-rows: auto minmax(0, 1fr); gap: 12px; padding: 12px; overflow: auto; background: var(--mv-canvas-bg); color: var(--mv-text-primary); }
+.class-canvas__toolbar { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: end; gap: 8px; padding: 8px; border: 1px solid var(--mv-border); border-radius: var(--mv-r-sm); background: var(--mv-panel-bg); }
+.class-canvas__toolbar label, .class-canvas__editor label { display: grid; gap: 3px; font-size: 11px; }
+.class-canvas button, .class-canvas input, .class-canvas select { min-height: 28px; border: 1px solid var(--mv-border); border-radius: var(--mv-r-sm); background: var(--mv-input-bg); color: var(--mv-text-primary); font: inherit; }
+.class-canvas button { padding: 3px 8px; cursor: pointer; }
+.class-canvas button:focus-visible, .class-canvas input:focus-visible, .class-canvas select:focus-visible { outline: 2px solid var(--mv-accent); outline-offset: 2px; }
+.class-canvas__surface { position: relative; min-height: 440px; padding: 24px; border: 1px solid var(--mv-border); border-radius: var(--mv-r-sm); background-image: radial-gradient(var(--mv-dot-color) 1px, var(--mv-transparent) 1px); background-size: 24px 24px; overflow: auto; }
+.class-canvas__namespace { position: absolute; z-index: 0; display: grid; gap: 4px; }
+.class-canvas__namespace .namespace-node { pointer-events: auto; }
+.class-canvas__classes { position: absolute; inset: 0; z-index: 2; }
+.class-canvas__class { position: absolute; display: grid; gap: 4px; }
+.class-canvas__select { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; opacity: 0; }
+.class-canvas__name { position: relative; z-index: 3; justify-self: center; }
+.class-canvas__class > input { position: relative; z-index: 3; width: 180px; }
+.class-canvas__move { position: absolute; z-index: 4; top: 4px; left: 4px; min-height: 20px !important; padding: 1px 4px !important; font-size: 10px; cursor: grab !important; }
+.class-canvas__resize { position: absolute; right: -3px; bottom: -3px; z-index: 4; width: 12px; height: 12px; border: 1px solid var(--mv-border); border-radius: 2px; background: var(--mv-panel-bg); cursor: nwse-resize; }
+.class-canvas__relationships { position: absolute; inset: 0; z-index: 1; width: 100%; min-height: 160px; pointer-events: none; }
+.class-canvas__relationships g { pointer-events: auto; cursor: pointer; }
+.class-canvas__relationship-list { position: relative; z-index: 3; display: flex; flex-wrap: wrap; gap: 6px; margin: 24px 0 0; padding: 0; list-style: none; }
+.class-canvas__editor { align-self: start; display: grid; gap: 8px; padding: 12px; border: 1px solid var(--mv-border); border-radius: var(--mv-r-sm); background: var(--mv-panel-bg); }
+.class-canvas__editor h2, .class-canvas__editor h3 { margin: 0; }
+.class-canvas__editor ul { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.class-canvas__member-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px; font-family: var(--mv-font-mono); font-size: 11px; }
+.class-canvas__member-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 3px; }
+.class-canvas__member-actions button { min-height: 22px; padding: 1px 5px; font-size: 10px; }
+@media (max-width: 800px) { .class-canvas { grid-template-columns: 1fr; } .class-canvas__editor { grid-row: auto; } }

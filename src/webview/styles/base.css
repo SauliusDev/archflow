@@ -1,0 +1,150 @@
+/* ── Box-sizing reset ────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Full-bleed root ─────────────────────────────────────────────────────── */
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--mv-canvas-bg);
+  color: var(--mv-text-primary);
+  font-family: var(--mv-font-ui);
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Canvas container ────────────────────────────────────────────────────── */
+.canvas-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.canvas-workarea {
+  position: absolute;
+  /* Canvas chrome overlays the flow, like the bottom zoom bar; it must not
+     reserve a blank left strip that clips grid-aligned nodes. */
+  inset: 0;
+}
+
+/* ── React Flow overrides ────────────────────────────────────────────────── */
+.react-flow {
+  background: var(--mv-canvas-bg);
+}
+
+.canvas-container--modern .react-flow {
+  background: var(--mv-canvas-bg);
+}
+
+:root[data-theme="light"] .canvas-container--modern .react-flow,
+:root[data-theme="vscode-adaptive"] body.vscode-light .canvas-container--modern .react-flow,
+:root[data-theme="vscode-adaptive"] body.vscode-high-contrast-light .canvas-container--modern .react-flow {
+  background: #fff;
+}
+
+.canvas-container--modern .react-flow,
+.canvas-container--modern .react-flow__renderer,
+.canvas-container--modern .react-flow__viewport {
+  width: 100%;
+  height: 100%;
+}
+
+.workflow-paper-grid {
+  opacity: 1;
+}
+
+.workflow-paper-grid-minor line,
+.workflow-paper-grid-minor path,
+.workflow-paper-grid-major line,
+.workflow-paper-grid-major path {
+  stroke-linecap: round;
+}
+
+.canvas-container--modern .react-flow__pane {
+  cursor: grab;
+}
+
+.canvas-container--modern .react-flow__pane:active {
+  cursor: grabbing;
+}
+
+
+/* Not relevant inside VS Code extension */
+.react-flow__attribution {
+  display: none;
+}
+
+/* ── Glass-morphism pattern (used by Sidebar, Palette, MiscBar, etc.) ────── */
+.glass {
+  background: var(--mv-glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--mv-border);
+  box-shadow: var(--mv-shadow-bar);
+}
+
+.glass--heavy {
+  background: var(--mv-glass-bg-heavy);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── App root layout ─────────────────────────────────────────────────── */
+.app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.app__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0; /* required: prevents flex children from overflowing */
+  position: relative;
+}
+
+.app[data-layout-style='modern'] {
+  gap: 6px;
+  padding: 6px;
+  background: var(--mv-canvas-bg);
+}
+
+.app__panel {
+  flex: 1;
+  overflow: hidden;
+  min-width: var(--mv-panel-min-width);
+}
+
+/* Visible focus ring using design token */
+:focus-visible {
+  outline: 2px solid var(--mv-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Screen-reader-only — used by LiveRegion */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

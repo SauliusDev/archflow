@@ -1,0 +1,181 @@
+.node-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: var(--mv-glass-bg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r-pill);
+  box-shadow: var(--mv-shadow-md);
+  z-index: var(--mv-z-topbar);
+}
+
+.node-toolbar__btn {
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: var(--mv-transparent);
+  color: var(--mv-text-secondary);
+  border-radius: var(--mv-r-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: background 0.12s ease, color 0.12s ease;
+  flex-shrink: 0;
+}
+
+.node-toolbar__btn:hover {
+  background: var(--mv-bg-hover);
+  color: var(--mv-text-primary);
+}
+
+.node-toolbar__btn--active {
+  background: var(--mv-accent-dim);
+  color: var(--mv-accent);
+}
+
+.node-toolbar__btn--active:hover {
+  background: var(--mv-accent-dim);
+  color: var(--mv-accent);
+}
+
+.node-toolbar__btn--danger {
+  color: var(--mv-red);
+}
+
+.node-toolbar__btn--danger:hover {
+  background: var(--mv-danger-bg);
+  color: var(--mv-red);
+}
+
+.node-toolbar__scratchpad-icon {
+  width: 15px;
+  height: 15px;
+}
+
+.node-toolbar__divider {
+  width: 1px;
+  height: 16px;
+  background: var(--mv-border);
+  flex-shrink: 0;
+  margin: 0 2px;
+}
+
+.node-toolbar__shape-wrapper {
+  position: relative;
+}
+
+.node-toolbar__color-wrapper {
+  position: relative;
+}
+
+.node-toolbar__border-width {
+  height: 26px;
+  max-width: 54px;
+  border: none;
+  border-radius: var(--mv-r-sm);
+  background: var(--mv-transparent);
+  color: var(--mv-text-secondary);
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.node-toolbar__border-width:hover {
+  background: var(--mv-bg-hover);
+  color: var(--mv-text-primary);
+}
+
+.node-toolbar__alignment-wrapper {
+  position: relative;
+}
+
+.node-toolbar__alignment-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background: var(--mv-glass-bg-heavy);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r-md);
+  box-shadow: var(--mv-shadow-md);
+  z-index: var(--mv-z-color-picker);
+}
+
+.node-toolbar__alignment-option {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--mv-r-sm);
+  background: var(--mv-transparent);
+  color: var(--mv-text-secondary);
+  cursor: pointer;
+}
+
+.node-toolbar__alignment-option:hover,
+.node-toolbar__alignment-option--active {
+  color: var(--mv-accent);
+  background: var(--mv-accent-dim);
+}
+
+.node-toolbar__alignment-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.node-toolbar__shape-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--mv-glass-bg-heavy);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r-md);
+  box-shadow: var(--mv-shadow-md);
+  z-index: var(--mv-z-color-picker);
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  gap: 2px;
+  min-width: 110px;
+}
+
+.node-toolbar__shape-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border: none;
+  background: var(--mv-transparent);
+  color: var(--mv-text-secondary);
+  border-radius: var(--mv-r-sm);
+  cursor: pointer;
+  font-size: 11px;
+  width: 100%;
+  text-align: left;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.node-toolbar__shape-option:hover {
+  background: var(--mv-bg-hover);
+  color: var(--mv-text-primary);
+}
+
+.node-toolbar__shape-option--active {
+  color: var(--mv-accent);
+  background: var(--mv-accent-dim);
+}
+
+.node-toolbar :is(button, input):focus-visible {
+  outline: 2px solid var(--mv-border-focus);
+  outline-offset: 2px;
+}

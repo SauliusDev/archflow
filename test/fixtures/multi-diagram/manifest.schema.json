@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flowforge.dev/schemas/multi-diagram-manifest.schema.json",
+  "title": "Flowforge multi-diagram fixture manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "mermaidVersion", "fixtures"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "mermaidVersion": { "type": "string", "const": "11.14.0" },
+    "fixtures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "family", "declaration", "category", "sourcePath", "provenance", "mermaidVersion", "sha256", "expected", "consumingLayers", "classification", "tags"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]+$" },
+          "family": { "enum": ["flowchart", "sequence", "zenuml", "class", "state", "er", "architecture", "c4", "unsupported", "malformed"] },
+          "declaration": { "type": "string", "minLength": 1 },
+          "category": { "enum": ["minimal", "representative", "advanced-preservation", "malformed", "unsupported", "stress"] },
+          "sourcePath": { "type": "string", "pattern": "^[^/].*\\.mmd$" },
+          "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "path"],
+            "properties": {
+              "kind": { "enum": ["offline-pack", "flowforge-authored", "generated"] },
+              "path": { "type": "string", "minLength": 1 }
+            }
+          },
+          "mermaidVersion": { "type": "string", "const": "11.14.0" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "expected": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["validation", "render"],
+            "properties": {
+              "validation": { "enum": ["pass", "fail", "unsupported"] },
+              "render": { "enum": ["pass", "fail", "unsupported"] }
+            }
+          },
+          "consumingLayers": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
+          "classification": { "enum": ["contract", "known-limitation", "future-target"] },
+          "tags": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "name": "flowforge",
+  "displayName": "FlowForge",
+  "publisher": "sauliusd3v",
+  "version": "0.0.1",
+  "description": "Mermaid diagram visual editor for VS Code",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SauliusDev/flowforge.git"
+  },
+  "icon": "assets/logo.png",
+  "main": "./out/extension.js",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "activationEvents": [
+    "onCustomEditor:flowforge.editor",
+    "onCustomEditor:archflow.editor",
+    "onLanguage:mermaid",
+    "onStartupFinished",
+    "onCommand:flowforge.openFlowchart",
+    "onCommand:flowforge.insertFromSelection"
+  ],
+  "contributes": {
+    "commands": [
+      { "command": "flowforge.openFlowchart", "title": "Flowforge: Open Flowchart Canvas" },
+      { "command": "flowforge.insertFromSelection", "title": "Flowforge: Insert Selection as Flowchart Node" }
+    ],
+    "customEditors": [
+      {
+        "viewType": "flowforge.editor",
+        "displayName": "Flowforge Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.mmd"
+          }
+        ],
+        "priority": "default"
+      },
+      {
+        "viewType": "archflow.editor",
+        "displayName": "Flowforge Editor (Legacy)",
+        "selector": [
+          {
+            "filenamePattern": "*.mmd"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
+    "configuration": {
+      "title": "Flowforge",
+      "properties": {
+        "flowforge.autoSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically save the diagram after editing stops (1.5 second debounce). When disabled, use Ctrl+S / ⌘S to save manually."
+        },
+        "flowforge.smartRouting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically route flowchart edges around nodes and existing edges when a clear path is available."
+        },
+        "flowforge.snapToGrid": {
+          "type": "boolean",
+          "default": true,
+          "description": "Align flowchart nodes and palette drops to the canvas grid. Disable for free placement."
+        },
+        "flowforge.newEdgeRouteMode": {
+          "type": "string",
+          "enum": ["straight", "orthogonal", "curved"],
+          "default": "curved",
+          "scope": "application",
+          "description": "Route mode to apply to newly created flowchart edges."
+        },
+        "flowforge.layoutStyle": {
+          "type": "string",
+          "enum": ["classic", "modern"],
+          "default": "classic",
+          "scope": "application",
+          "description": "Choose the Flowforge editor chrome and panel layout style."
+        },
+        "flowforge.gridStyle": {
+          "type": "string",
+          "enum": ["grid", "dots"],
+          "default": "grid",
+          "scope": "application",
+          "description": "Choose the canvas background grid style."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "dev": "concurrently -n ext,web \"node esbuild.mjs --watch\" \"vite\"",
+    "build": "node esbuild.mjs && vite build",
+    "lint": "eslint src",
+    "test:webview": "NODE_ENV=test vitest run --config vitest.config.mts",
+    "test:unit": "vitest run --config vitest.config.host.ts",
+    "test:webview:refactor": "vitest run --config vitest.config.mts src/webview/lib/documentSession.test.ts src/webview/lib/store.compatibility.test.ts src/webview/lib/store.test.ts src/webview/lib/store.class.test.ts src/webview/App.externalChange.test.tsx src/webview/components/Canvas.test.tsx",
+    "test:host:refactor": "vitest run --config vitest.config.host.ts src/extension/FlowforgeEditorProvider.test.ts",
+    "test:refactor": "npm run test:webview:refactor && npm run test:host:refactor",
+    "test:architecture": "node --test test/architecture/boundaries.test.mjs",
+    "check:architecture": "node scripts/check-architecture.mjs",
+    "test:multi-diagram-baseline": "node scripts/multi-diagram/aggregate.mjs"
+  },
+  "dependencies": {
+    "@dagrejs/dagre": "^3.0.0",
+    "@xyflow/react": "^12.0.0",
+    "codemirror": "^6.0.0",
+    "mermaid": "^11.13.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "latest",
+    "@testing-library/user-event": "latest",
+    "@tomjs/vite-plugin-vscode": "^7.1.1",
+    "@types/mocha": "latest",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "@vitejs/plugin-react": "^5.0.0",
+    "@vitest/ui": "^3.0.0",
+    "concurrently": "latest",
+    "esbuild": "latest",
+    "eslint": "^9.0.0",
+    "jest-mock-vscode": "latest",
+    "jsdom": "latest",
+    "mocha": "^10.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^5.0.0",
+    "vitest": "^3.0.0"
+  }
+}

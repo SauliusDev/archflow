@@ -1,0 +1,45 @@
+.flow-minimap {
+  position: absolute;
+  right: var(--mv-space-3);
+  bottom: var(--mv-space-3);
+  width: 180px;
+  height: 108px;
+  overflow: visible;
+  background: var(--mv-glass-bg-heavy);
+  border: 1px solid var(--mv-border-light);
+  border-radius: var(--mv-r-md);
+  box-shadow: var(--mv-shadow-sm);
+  z-index: var(--mv-z-sidebar);
+  pointer-events: none;
+}
+
+.flow-minimap__edge {
+  stroke: var(--mv-edge-stroke);
+  stroke-width: 1.5;
+}
+
+.flow-minimap__arrow path {
+  fill: var(--mv-edge-stroke);
+}
+
+.flow-minimap__endpoint circle {
+  fill: var(--mv-canvas-bg);
+  stroke: var(--mv-edge-stroke);
+  stroke-width: 1;
+}
+
+.flow-minimap__endpoint path {
+  fill: none;
+  stroke: var(--mv-edge-stroke);
+  stroke-width: 1.25;
+}
+
+.flow-minimap__node {
+  stroke-width: 1;
+}
+
+.flow-minimap__viewport {
+  fill: var(--mv-accent-dim);
+  stroke: var(--mv-accent);
+  stroke-width: 1;
+}

@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "baselineManifest": "test/fixtures/multi-diagram/manifest.json",
+  "mermaidVersion": "11.14.0",
+  "fixtures": [
+    {
+      "id": "flowchart-preamble",
+      "path": "flowchart-preamble.mmd",
+      "family": "flowchart",
+      "expectedDeclaration": "flowchart",
+      "provenance": "test/fixtures/multi-diagram/flowchart/representative-subgraph.mmd"
+    },
+    {
+      "id": "sequence",
+      "path": "sequence.mmd",
+      "family": "sequence",
+      "expectedDeclaration": "sequenceDiagram",
+      "provenance": "test/fixtures/multi-diagram/sequence/minimal.mmd"
+    },
+    {
+      "id": "zenuml",
+      "path": "zenuml.mmd",
+      "family": "zenuml",
+      "expectedDeclaration": "zenuml",
+      "provenance": "test/fixtures/multi-diagram/zenuml/minimal.mmd"
+    },
+    {
+      "id": "class",
+      "path": "class.mmd",
+      "family": "class",
+      "expectedDeclaration": "classDiagram",
+      "provenance": "test/fixtures/multi-diagram/class/representative.mmd"
+    },
+    {
+      "id": "state",
+      "path": "state.mmd",
+      "family": "state",
+      "expectedDeclaration": "stateDiagram-v2",
+      "provenance": "test/fixtures/multi-diagram/state/minimal.mmd"
+    },
+    {
+      "id": "er",
+      "path": "er.mmd",
+      "family": "er",
+      "expectedDeclaration": "erDiagram",
+      "provenance": "test/fixtures/multi-diagram/er/minimal.mmd"
+    },
+    {
+      "id": "architecture",
+      "path": "architecture.mmd",
+      "family": "architecture",
+      "expectedDeclaration": "architecture-beta",
+      "provenance": "test/fixtures/multi-diagram/architecture/representative.mmd"
+    },
+    {
+      "id": "c4-context",
+      "path": "c4-context.mmd",
+      "family": "c4-context",
+      "expectedDeclaration": "C4Context",
+      "provenance": "test/fixtures/multi-diagram/c4/representative.mmd"
+    },
+    {
+      "id": "unsupported-gantt",
+      "path": "unsupported-gantt.mmd",
+      "family": "other",
+      "expectedDeclaration": "gantt",
+      "provenance": "test/fixtures/multi-diagram/unsupported/gantt.mmd"
+    },
+    {
+      "id": "malformed",
+      "path": "malformed.mmd",
+      "family": "flowchart",
+      "expectedDeclaration": "flowchart",
+      "provenance": "test/fixtures/multi-diagram/malformed/broken-flowchart.mmd"
+    },
+    {
+      "id": "layout-v1",
+      "path": "layout-v1.json",
+      "family": "flowchart",
+      "expectedDeclaration": "layout-v1",
+      "provenance": "src/webview/lib/embeddedLayout.test.ts"
+    },
+    {
+      "id": "layout-v2",
+      "path": "layout-v2.json",
+      "family": "flowchart",
+      "expectedDeclaration": "layout-v2",
+      "provenance": "src/webview/lib/embeddedLayout.test.ts"
+    }
+  ]
+}

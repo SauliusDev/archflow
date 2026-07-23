@@ -1,0 +1,210 @@
+/* ── Base Edge ──────────────────────────────────────────────────────────────── */
+.react-flow__edge-path {
+  stroke: var(--mv-edge-stroke) !important;
+  stroke-width: 1.5px !important;
+}
+
+/* ── Edge marker (arrow) ────────────────────────────────────────────────────── */
+.react-flow__arrowhead path {
+  fill: var(--mv-edge-stroke) !important;
+}
+
+/* ── Selected edge ──────────────────────────────────────────────────────────── */
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--mv-edge-selected) !important;
+}
+
+.react-flow__edge.selected .react-flow__arrowhead path {
+  fill: var(--mv-edge-selected) !important;
+}
+
+/* ── Connection line (rubber-band while dragging) ───────────────────────────── */
+.react-flow__connection-path {
+  stroke: var(--mv-accent) !important;
+  stroke-width: 1.5px !important;
+  stroke-dasharray: 5, 3;
+}
+
+/* ── Pending arrow-button connection ─────────────────────────────────────── */
+.pending-connection-preview {
+  position: fixed;
+  inset: 0;
+  z-index: var(--mv-z-edge-controls);
+  width: 100vw;
+  height: 100vh;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.pending-connection-preview path {
+  fill: none;
+  stroke: var(--mv-accent);
+  stroke-width: 1.5px;
+  stroke-dasharray: 5 3;
+}
+
+.pending-connection-preview marker path {
+  fill: var(--mv-accent);
+  stroke: none;
+}
+
+/* ── FlowEdge Path ──────────────────────────────────────────────────────────── */
+.react-flow__edge-path.flow-edge__path {
+  stroke: var(--mv-edge-stroke);
+  stroke-width: 2px;
+  fill: none;
+}
+
+.react-flow__edge-path.flow-edge__path--dotted {
+  stroke-dasharray: 4 3;
+}
+
+/* !important needed to override the existing base rule's !important */
+.react-flow__edge-path.flow-edge__path--thick {
+  stroke-width: 2.5px !important;
+}
+
+/* !important needed to override the existing base rule's !important */
+.react-flow__edge-path.flow-edge__path--selected {
+  stroke: var(--mv-edge-selected) !important;
+}
+
+/* ── FlowEdge Arrowhead Markers ─────────────────────────────────────────────── */
+.flow-edge__arrowhead {
+  fill: var(--mv-edge-stroke);
+}
+
+.flow-edge__arrowhead--selected {
+  fill: var(--mv-edge-selected);
+}
+
+/* ── Edge Style Toolbar ─────────────────────────────────────────────────────── */
+.flow-edge__toolbar {
+  /* Must clear node content (z-index 1) and handles, or a node label covers the
+     selected-edge controls and swallows the click. */
+  z-index: var(--mv-z-edge-controls);
+  display: flex;
+  gap: 2px;
+  background: var(--mv-bg-elevated);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r-sm);
+  padding: 3px;
+  box-shadow: var(--mv-shadow-sm);
+}
+
+.flow-edge__style-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: var(--mv-transparent);
+  border: none;
+  border-radius: var(--mv-r-sm);
+  color: var(--mv-text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.flow-edge__style-btn:hover {
+  background: var(--mv-bg-hover);
+  color: var(--mv-text-primary);
+}
+
+.flow-edge__style-btn--active {
+  background: var(--mv-accent-dim);
+  color: var(--mv-accent);
+}
+
+.flow-edge__route-preview {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.flow-edge__toolbar-separator {
+  width: 1px;
+  margin: 2px;
+  background: var(--mv-border);
+}
+
+.flow-edge__waypoint {
+  z-index: var(--mv-z-edge-controls);
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: 2px solid var(--mv-accent);
+  border-radius: 50%;
+  background: var(--mv-bg-elevated);
+  cursor: move;
+}
+
+.flow-edge__waypoint:focus-visible {
+  outline: 2px solid var(--mv-focus-ring);
+  outline-offset: 2px;
+}
+
+.flow-edge__endpoint {
+  z-index: var(--mv-z-edge-controls);
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: 2px solid var(--mv-bg-elevated);
+  border-radius: 50%;
+  background: var(--mv-accent);
+  box-shadow: 0 0 0 1px var(--mv-edge-stroke), var(--mv-shadow-sm);
+  cursor: grab;
+}
+
+.flow-edge__endpoint:active { cursor: grabbing; }
+
+.flow-edge__endpoint:focus-visible {
+  outline: 2px solid var(--mv-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── Edge Label ──────────────────────────────────────────────────────────────── */
+.flow-edge__label-area {
+  /* Edge labels share the portal with controls; lift them above SVG paths. */
+  z-index: var(--mv-z-edge-controls);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  min-height: 18px;
+}
+
+.flow-edge__label {
+  background: var(--mv-bg-elevated);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r-sm);
+  padding: 1px 5px;
+  font-size: 11px;
+  color: var(--mv-text-primary);
+  white-space: nowrap;
+  pointer-events: all;
+  cursor: text;
+}
+
+.flow-edge__label-affordance {
+  color: var(--mv-text-dim);
+  font-size: 11px;
+  opacity: 0.6;
+  cursor: text;
+}
+
+.flow-edge__label-input {
+  background: var(--mv-bg-elevated);
+  border: 1px solid var(--mv-accent);
+  border-radius: var(--mv-r-sm);
+  padding: 1px 5px;
+  font-size: 11px;
+  color: var(--mv-text-primary);
+  outline: none;
+  min-width: 60px;
+  max-width: 200px;
+}

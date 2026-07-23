@@ -1,0 +1,53 @@
+.canvas-node-inspector {
+  position: absolute;
+  z-index: var(--mv-z-sidebar);
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  width: min(400px, calc(100% - 32px));
+  max-height: calc(100% - 32px);
+  overflow: auto;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  color: var(--mv-text-primary);
+  background: var(--mv-glass-bg-heavy);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r-md);
+  box-shadow: var(--mv-shadow-bar);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.canvas-node-inspector__header { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; }
+.canvas-node-inspector__node-id { max-width: 150px; overflow: hidden; color: var(--mv-text-secondary); font-size: 11px; font-weight: 400; text-overflow: ellipsis; white-space: nowrap; }
+.canvas-node-inspector__field, .canvas-node-inspector__colors { display: grid; gap: 8px; }
+.canvas-node-inspector__field > span, .canvas-node-inspector__colors span, .canvas-node-inspector__group legend { color: var(--mv-text-secondary); font-size: 11px; }
+.canvas-node-inspector textarea, .canvas-node-inspector select { width: 100%; border: 1px solid var(--mv-border); border-radius: var(--mv-r-sm); background: var(--mv-bg-overlay); color: var(--mv-text-primary); font: inherit; padding: 7px 8px; }
+.canvas-node-inspector textarea { resize: vertical; min-height: 64px; }
+.canvas-node-inspector__group { border: 0; display: grid; gap: 6px; }
+.canvas-node-inspector__button-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.canvas-node-inspector button { min-height: 28px; border: 1px solid var(--mv-border); border-radius: var(--mv-r-sm); background: var(--mv-transparent); color: var(--mv-text-secondary); cursor: pointer; font: inherit; }
+.canvas-node-inspector button[aria-pressed='true'] { background: var(--mv-accent-dim); border-color: var(--mv-accent); color: var(--mv-accent); }
+.canvas-node-inspector button:disabled, .canvas-node-inspector input:disabled, .canvas-node-inspector select:disabled, .canvas-node-inspector textarea:disabled { cursor: not-allowed; opacity: .48; }
+.canvas-node-inspector__button-row button svg { width: 16px; height: 16px; vertical-align: middle; }
+.canvas-node-inspector__shape-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.canvas-node-inspector__shape-tile { min-height: 58px; display: grid; place-items: center; gap: 5px; padding: 6px; font-size: 11px; line-height: 1.2; }
+.canvas-node-inspector__shape-preview { width: 100%; height: 40px; color: var(--mv-text-primary); }
+.canvas-node-inspector__colors { grid-template-columns: 1fr; align-items: start; }
+.canvas-node-inspector__linked-color-inputs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.canvas-node-inspector__color-input { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px; min-width: 0; color: var(--mv-text-secondary); font-size: 11px; }
+.canvas-node-inspector__color-input input { width: 36px; height: 28px; border: 1px solid var(--mv-border); border-radius: var(--mv-r-sm); background: transparent; padding: 2px; }
+.canvas-node-inspector__swatches { display: grid; grid-template-columns: repeat(8, minmax(24px, 1fr)); gap: 4px; }
+.canvas-node-inspector__swatch { min-height: 24px !important; aspect-ratio: 1; padding: 0; }
+.canvas-node-inspector__colors > * { min-width: 0; }
+.canvas-node-inspector__color-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+
+@media (max-width: 640px) {
+  /* Keep the right-bottom minimap (108px + 12px inset) and bottom zoom bar
+     outside the inspector's scrollable bounds. */
+  .canvas-node-inspector { top: 12px; right: 12px; bottom: 132px; width: min(360px, calc(100vw - 24px)); max-height: none; transform: none; }
+  .canvas-node-inspector__shape-grid { grid-template-columns: repeat(4, 1fr); }
+  .canvas-node-inspector__colors { grid-template-columns: 1fr; }
+  .canvas-node-inspector__swatches { grid-template-columns: repeat(8, 1fr); }
+}

@@ -1,0 +1,93 @@
+/* ── SubgraphNode ────────────────────────────────────────────────────────── */
+.subgraph-node {
+  width: 100%;
+  height: 100%;
+  border: 2px dashed var(--mv-subgraph-stroke);
+  border-radius: var(--mv-r-lg);
+  background: var(--mv-subgraph-fill);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  /* A container must not swallow clicks aimed at the nodes it visually encloses.
+     Lanes are created after existing nodes, so they paint on top; without this a
+     node inside a lane becomes unselectable. Interactive parts opt back in below. */
+  pointer-events: none;
+}
+
+.subgraph-node--selected {
+  border-color: var(--mv-accent);
+  box-shadow: 0 0 0 1px var(--mv-accent-mid);
+}
+
+.subgraph-node--lane {
+  border-style: solid;
+  background: color-mix(in srgb, var(--mv-subgraph-fill) 86%, var(--mv-accent-dim));
+}
+
+.subgraph-node__lane-badge {
+  float: right;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--mv-accent-dim);
+  color: var(--mv-accent);
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.subgraph-node__header {
+  padding: 4px 8px;
+  border-bottom: 1px dashed var(--mv-subgraph-stroke);
+  background: var(--mv-subgraph-header-bg);
+  border-radius: var(--mv-r-lg) var(--mv-r-lg) 0 0;
+  cursor: grab;
+  flex-shrink: 0;
+  pointer-events: all;
+}
+
+.subgraph-node__label {
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--mv-font-ui);
+  color: var(--mv-text-secondary);
+  cursor: text;
+  user-select: none;
+  white-space: nowrap;
+  display: block;
+}
+
+.subgraph-node__label-input {
+  font-size: 11px;
+  font-family: var(--mv-font-ui);
+  color: var(--mv-text-primary);
+  background: var(--mv-bg-overlay);
+  border: 1px solid var(--mv-border-focus);
+  border-radius: var(--mv-r-sm);
+  padding: 1px 4px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.subgraph-node__body {
+  flex: 1;
+  position: relative;
+  /* The interior is purely visual. Without this it paints over nodes that sit
+     inside the lane and swallows their clicks; drop targeting is geometric
+     (findDropTargetSubgraph), so nothing depends on the body receiving pointers.
+     The header stays interactive for selecting and dragging the lane. */
+  pointer-events: none;
+}
+
+/* ── Drag-to-assign drop-target highlight ─────────────────────────────────── */
+.react-flow__node.drop-target .subgraph-node {
+  border-color: var(--mv-accent);
+  border-style: solid;
+  box-shadow: 0 0 0 2px var(--mv-accent-mid);
+}
+
+/* Re-enable pointer input for the lane's own interactive affordances. */
+.subgraph-node .flow-node__handle,
+.subgraph-node .react-flow__resize-control {
+  pointer-events: all;
+}

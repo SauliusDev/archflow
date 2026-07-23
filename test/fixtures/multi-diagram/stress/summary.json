@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "generatorVersion": 1,
+  "fixtures": [
+    {
+      "id": "stress-flowchart-medium",
+      "family": "flowchart",
+      "profile": "medium",
+      "seed": 613655226,
+      "generatorVersion": 1,
+      "sourcePath": "stress/flowchart-medium.mmd",
+      "sha256": "b88c4223bab54eb04d6eca4c85d0daf145d3fc0e9b92fca13a22176e9dff8ac9",
+      "byteLength": 2808,
+      "validationExpectation": "valid",
+      "counts": {
+        "nodes": 80,
+        "edges": 80,
+        "nestedSubgraphs": 2,
+        "repeatedEdges": 1,
+        "comments": 1,
+        "directives": 2,
+        "passthroughConstructs": 2
+      }
+    },
+    {
+      "id": "stress-flowchart-large",
+      "family": "flowchart",
+      "profile": "large",
+      "seed": 3559707634,
+      "generatorVersion": 1,
+      "sourcePath": "stress/flowchart-large.mmd",
+      "sha256": "7dbd3e9e83118a4d7ac2d54e30a6118539a611866899081001067375855a5e8e",
+      "byteLength": 11589,
+      "validationExpectation": "valid",
+      "counts": {
+        "nodes": 320,
+        "edges": 320,
+        "nestedSubgraphs": 2,
+        "repeatedEdges": 1,
+        "comments": 1,
+        "directives": 2,
+        "passthroughConstructs": 2
+      }
+    },
+    {
+      "id": "stress-sequence-medium",
+      "family": "sequence",
+      "profile": "medium",
+      "seed": 2318785013,
+      "generatorVersion": 1,
+      "sourcePath": "stress/sequence-medium.mmd",
+      "sha256": "548a027ffe586e94affcf59a1d873204d6bd781cab02487b13fad4c1d0a775fd",
+      "byteLength": 2348,
+      "validationExpectation": "valid",
+      "counts": {
+        "participants": 8,
+        "messages": 80
+      }
+    },
+    {
+      "id": "stress-sequence-large",
+      "family": "sequence",
+      "profile": "large",
+      "seed": 1813596503,
+      "generatorVersion": 1,
+      "sourcePath": "stress/sequence-large.mmd",
+      "sha256": "ad8c6330b42d7f2090ed3626e754f7d871536bd79252ab62344af233aeaf5679",
+      "byteLength": 10082,
+      "validationExpectation": "valid",
+      "counts": {
+        "participants": 32,
+        "messages": 320
+      }
+    },
+    {
+      "id": "stress-zenuml-medium",
+      "family": "zenuml",
+      "profile": "medium",
+      "seed": 1770616517,
+      "generatorVersion": 1,
+      "sourcePath": "stress/zenuml-medium.mmd",
+      "sha256": "19e1441c7b7779823ab5b78f4b96e16b6186c442c815abce1dea3b95af6ffde3",
+      "byteLength": 2011,
+      "validationExpectation": "unsupported",
+      "counts": {
+        "participants": 8,
+        "messages": 80
+      }
+    },
+    {
+      "id": "stress-zenuml-large",
+      "family": "zenuml",
+      "profile": "large",
+      "seed": 410440327,
+      "generatorVersion": 1,
+      "sourcePath": "stress/zenuml-large.mmd",
+      "sha256": "ecf5a7ab4be3dcb1cc8d47e9337b75c6668e2216f9b99e0896fe49b8e14748dd",
+      "byteLength": 8659,
+      "validationExpectation": "unsupported",
+      "counts": {
+        "participants": 32,
+        "messages": 320
+      }
+    },
+    {
+      "id": "stress-class-medium",
+      "family": "class",
+      "profile": "medium",
+      "seed": 764804674,
+      "generatorVersion": 1,
+      "sourcePath": "stress/class-medium.mmd",
+      "sha256": "af39aa9cdaffd27627bb48998553c04b57908818cd85a62af10b8f1f7d3e6f9a",
+      "byteLength": 4282,
+      "validationExpectation": "valid",
+      "counts": {
+        "classes": 80,
+        "members": 80,
+        "relations": 79
+      }
+    },
+    {
+      "id": "stress-class-large",
+      "family": "class",
+      "profile": "large",
+      "seed": 2871846762,
+      "generatorVersion": 1,
+      "sourcePath": "stress/class-large.mmd",
+      "sha256": "3f87c90c5b0dc8455e21580b8fda231ef484dcd3c3ee484a225f185934730efc",
+      "byteLength": 17868,
+      "validationExpectation": "valid",
+      "counts": {
+        "classes": 320,
+        "members": 320,
+        "relations": 319
+      }
+    },
+    {
+      "id": "stress-state-medium",
+      "family": "state",
+      "profile": "medium",
+      "seed": 2407253851,
+      "generatorVersion": 1,
+      "sourcePath": "stress/state-medium.mmd",
+      "sha256": "a1000a49e2b5da8235a69884e1f3c5807a71baee7ce4f932eaf04b5e73d38f3a",
+      "byteLength": 1831,
+      "validationExpectation": "valid",
+      "counts": {
+        "states": 80,
+        "transitions": 81
+      }
+    },
+    {
+      "id": "stress-state-large",
+      "family": "state",
+      "profile": "large",
+      "seed": 2370639665,
+      "generatorVersion": 1,
+      "sourcePath": "stress/state-large.mmd",
+      "sha256": "484592fc94ea80cb1a202106d4148fd4b2025dadb9d6efb82a08fd94b5d54f96",
+      "byteLength": 8010,
+      "validationExpectation": "valid",
+      "counts": {
+        "states": 320,
+        "transitions": 321
+      }
+    },
+    {
+      "id": "stress-er-medium",
+      "family": "er",
+      "profile": "medium",
+      "seed": 996265633,
+      "generatorVersion": 1,
+      "sourcePath": "stress/er-medium.mmd",
+      "sha256": "b6812c2f535e842c3b1743a90ce9cfe5c63bc1996bebd643acaf531d78a237fb",
+      "byteLength": 4036,
+      "validationExpectation": "valid",
+      "counts": {
+        "entities": 80,
+        "attributes": 80,
+        "relations": 79
+      }
+    },
+    {
+      "id": "stress-er-large",
+      "family": "er",
+      "profile": "large",
+      "seed": 1216745259,
+      "generatorVersion": 1,
+      "sourcePath": "stress/er-large.mmd",
+      "sha256": "394b6b299a9f93eb0bb76281f90b522b473ed5b3d9553cc37e297679bd64bbca",
+      "byteLength": 16935,
+      "validationExpectation": "valid",
+      "counts": {
+        "entities": 320,
+        "attributes": 320,
+        "relations": 319
+      }
+    },
+    {
+      "id": "stress-architecture-medium",
+      "family": "architecture",
+      "profile": "medium",
+      "seed": 1139375367,
+      "generatorVersion": 1,
+      "sourcePath": "stress/architecture-medium.mmd",
+      "sha256": "f59879c61d8b80c29d2f55bc0e0f57c37345cfc76c100e9b13d3b57f96b75f6d",
+      "byteLength": 5036,
+      "validationExpectation": "valid",
+      "counts": {
+        "groups": 1,
+        "services": 80,
+        "edges": 79
+      }
+    },
+    {
+      "id": "stress-architecture-large",
+      "family": "architecture",
+      "profile": "large",
+      "seed": 112983045,
+      "generatorVersion": 1,
+      "sourcePath": "stress/architecture-large.mmd",
+      "sha256": "a1ce5d7614afadc5da34581990c562982227f73ef1a00121837e168afa95ad24",
+      "byteLength": 21035,
+      "validationExpectation": "valid",
+      "counts": {
+        "groups": 1,
+        "services": 320,
+        "edges": 319
+      }
+    },
+    {
+      "id": "stress-c4-medium",
+      "family": "c4",
+      "profile": "medium",
+      "seed": 689587749,
+      "generatorVersion": 1,
+      "sourcePath": "stress/c4-medium.mmd",
+      "sha256": "4dffabb96d342bf5f090f37d7aeac39b0fde5589c5c2a5bdbb1c52035ede7ac8",
+      "byteLength": 5809,
+      "validationExpectation": "valid",
+      "counts": {
+        "people": 1,
+        "systems": 80,
+        "relations": 80
+      }
+    },
+    {
+      "id": "stress-c4-large",
+      "family": "c4",
+      "profile": "large",
+      "seed": 98473767,
+      "generatorVersion": 1,
+      "sourcePath": "stress/c4-large.mmd",
+      "sha256": "7fcbcbc6c3b60f14828e3071e248bf2b4fcef10847eca4f1e770d9b2c6de4dff",
+      "byteLength": 23968,
+      "validationExpectation": "valid",
+      "counts": {
+        "people": 1,
+        "systems": 320,
+        "relations": 320
+      }
+    }
+  ]
+}

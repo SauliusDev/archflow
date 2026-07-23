@@ -1,0 +1,134 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Flowforge Design System — CSS Custom Properties
+   Three layers: Foundation → Component → State
+   RULE: All components reference --mv-* variables — never raw color values.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── FOUNDATION: Background Hierarchy ─────────────────────────────────── */
+  --mv-bg-deep: #0e0f10;                    /* Reserved; not used in v1        */
+  --mv-canvas-bg: #121314;                  /* Canvas, code panel background   */
+  --mv-bg-surface: #191a1b;                 /* Top bar, panel headers          */
+  --mv-bg-elevated: #202122;                /* Dropdowns, popovers, cards      */
+  --mv-bg-overlay: #242526;                 /* Input fields, overlay surfaces  */
+  --mv-bg-hover: rgba(255, 255, 255, 0.05); /* Button/list item hover          */
+  --mv-glass-bg: rgba(25, 26, 27, 0.92);    /* Glass panel surface (sidebar)   */
+  --mv-glass-bg-heavy: rgba(25, 26, 27, 0.96); /* Glass panel, heavy blur      */
+  --mv-backdrop: rgba(0, 0, 0, 0.45);       /* Modal and command palette veil  */
+  --mv-backdrop-subtle: rgba(0, 0, 0, 0.30); /* Settings modal dimming only      */
+  --mv-transparent: transparent;             /* Neutral transparent surface      */
+  --mv-switch-thumb: #ededed;                /* Toggle handle                    */
+
+  /* ── FOUNDATION: Text Hierarchy ───────────────────────────────────────── */
+  --mv-text-bright: #ededed;      /* Active tab labels, node labels           */
+  --mv-text-primary: #bfbfbf;     /* Body text, input values, zoom %          */
+  --mv-text-secondary: #8c8c8c;   /* Labels, inactive tabs, section headers   */
+  --mv-text-dim: #555555;         /* Line numbers, category labels (decorative) */
+  --mv-brand-flowforge: #3994bc;   /* Flowforge wordmark                          */
+
+  /* ── FOUNDATION: Accent System ────────────────────────────────────────── */
+  --mv-accent: #3994bc;                       /* Selection, focus, handles    */
+  --mv-accent-dim: rgba(57, 148, 188, 0.15);  /* Active tab bg, toggle-on     */
+  --mv-accent-mid: rgba(57, 148, 188, 0.30);  /* Active tab border, node glow */
+
+  /* ── FOUNDATION: Border Hierarchy ─────────────────────────────────────── */
+  --mv-border: #2a2b2c;           /* Default borders (panels, cards, dividers) */
+  --mv-border-light: #333536;     /* Lighter borders, subtle emphasis          */
+  --mv-border-focus: #3994bc;     /* Focus ring on inputs (same as accent)     */
+
+  /* ── FOUNDATION: Status Colors ────────────────────────────────────────── */
+  --mv-green: #72c892;            /* Success states                            */
+  --mv-yellow: #e5ba7d;           /* Warning states                            */
+  --mv-red: #f48771;              /* Error states, delete button danger hover  */
+  --mv-danger-bg: rgba(244, 135, 113, 0.15); /* Destructive control hover        */
+
+  /* ── FOUNDATION: Typography ───────────────────────────────────────────── */
+  --mv-font-ui: 'Inter', system-ui, sans-serif;
+  --mv-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* ── FOUNDATION: Syntax Highlighting (code panel) ─────────────────────── */
+  --mv-syntax-keyword: #ff7b72;     /* graph, subgraph, end (.ck)             */
+  --mv-syntax-string: #a5d6ff;      /* Strings in brackets (.cs)              */
+  --mv-syntax-function: #d2a8ff;    /* Functions (.cf)                        */
+  --mv-syntax-identifier: #ffa657;  /* Node IDs (.ci)                         */
+  --mv-syntax-comment: #8b949e;     /* %% comments (.cc)                      */
+  --mv-syntax-tag: #7ee787;         /* Tags (.ct)                             */
+  --mv-syntax-plain: #c9d1d9;       /* Plain text (.cp)                       */
+
+  /* ── COMPONENT: Node ───────────────────────────────────────────────────── */
+  --mv-node-fill: #1e2022;          /* Node background (all shapes)            */
+  --mv-node-stroke: #3a3c3e;        /* Node border (all shapes)                */
+  --mv-node-text: #bfbfbf;          /* Node label text                         */
+  --mv-node-selected: #3994bc;      /* Selected node border                    */
+
+  /* ── COMPONENT: Node Color Presets (8 swatches for color picker) ────────── */
+  --mv-node-color-1: #1e2022;       /* Default dark grey                       */
+  --mv-node-color-2: #1e2a3a;       /* Midnight blue                           */
+  --mv-node-color-3: #1e2a22;       /* Forest dark                             */
+  --mv-node-color-4: #2a1e2a;       /* Deep purple                             */
+  --mv-node-color-5: #2a221e;       /* Burnt sienna dark                       */
+  --mv-node-color-6: #2a2a1e;       /* Olive dark                              */
+  --mv-node-color-7: #1e2a2a;       /* Teal dark                               */
+  --mv-node-color-8: #2a1e22;       /* Rosewood dark                           */
+
+  /* ── COMPONENT: Edge ───────────────────────────────────────────────────── */
+  --mv-edge-stroke: #4a4d50;        /* Edge line color (1.5px default)         */
+  --mv-edge-selected: #3994bc;      /* Selected edge stroke                    */
+
+  /* ── COMPONENT: Subgraph ───────────────────────────────────────────────── */
+  --mv-subgraph-fill: rgba(255, 255, 255, 0.03); /* Subgraph container bg     */
+  --mv-subgraph-stroke: #3a3c3e;    /* Subgraph border (dashed)                */
+  --mv-subgraph-header-bg: rgba(255, 255, 255, 0.02);
+
+  /* ── COMPONENT: Canvas Grid ────────────────────────────────────────────── */
+  --mv-dot-color: rgba(255, 255, 255, 0.055); /* Canvas dot grid color        */
+  --mv-canvas-dot-spacing: 24px;    /* Dot grid spacing                        */
+
+  /* ── STATE: Interaction ────────────────────────────────────────────────── */
+  --mv-selected-border: var(--mv-accent);
+  --mv-hover-bg: rgba(57, 148, 188, 0.08);
+  --mv-focus-ring: var(--mv-border-focus);
+  --mv-panel-bg: var(--mv-bg-surface);
+  --mv-input-bg: var(--mv-bg-overlay);
+  --mv-text: var(--mv-text-primary);
+  --mv-dimmed-opacity: 0.4;         /* Non-connected elements when selection active */
+  --mv-handle-color: var(--mv-accent);
+  --mv-resize-handle-hover: var(--mv-accent);
+
+  /* ── SPACING: Component Dimensions (4px base unit) ─────────────────────── */
+  --mv-topbar-height: 40px;
+  --mv-panel-header-height: 34px;
+  --mv-sidebar-width: 36px;
+  --mv-sidebar-btn-size: 28px;
+  --mv-palette-width: 210px;
+  --mv-inspector-width: 248px;
+  --mv-resize-handle-width: 5px;
+  --mv-panel-min-width: 80px;
+  --mv-space-3: 12px;
+
+  /* ── BORDER RADIUS SCALE ────────────────────────────────────────────────── */
+  --mv-r-sm: 4px;      /* Buttons, tabs, inputs, small cards                  */
+  --mv-r-md: 8px;      /* Palette items, inspector cards, node toolbar         */
+  --mv-r-lg: 12px;     /* Popovers, dropdowns, subgraph containers             */
+  --mv-r-xl: 16px;     /* Sidebar, palette panel, rounded nodes                */
+  --mv-r-pill: 999px;  /* Misc bar, preview bar, pill nodes, toggle pills      */
+
+  /* ── SHADOW SCALE ───────────────────────────────────────────────────────── */
+  --mv-shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.4);   /* Small elevated elements */
+  --mv-shadow-md:  0 4px 16px rgba(0, 0, 0, 0.5);  /* Node toolbar, color picker */
+  --mv-shadow-lg:  0 8px 32px rgba(0, 0, 0, 0.6);  /* Palette, popovers       */
+  --mv-shadow-bar: 0 2px 12px rgba(0, 0, 0, 0.6);  /* Sidebar, misc bar       */
+
+  /* ── Z-INDEX HIERARCHY (9 layers) ──────────────────────────────────────── */
+  --mv-z-canvas:         0;    /* Nodes, edges, subgraphs                     */
+  --mv-z-selection-box:  5;    /* Marquee selection rectangle                 */
+  --mv-z-handles:        10;   /* Node handles, connect arrows, resize handle */
+  --mv-z-edge-controls:  20;   /* Selected-edge toolbar and waypoint handles  */
+  --mv-z-inspector:      50;   /* Right-sliding inspector panel               */
+  --mv-z-palette:        99;   /* Component palette panel                     */
+  --mv-z-sidebar:        100;  /* Canvas sidebar                              */
+  --mv-z-topbar:         200;  /* Top bar, node toolbar                       */
+  --mv-z-color-picker:   300;  /* Floating node color picker                  */
+  --mv-z-theme-dropdown: 500;  /* Theme selection popup                       */
+  --mv-z-dialog:         1000; /* Focused modal dialogs                       */
+}

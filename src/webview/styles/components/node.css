@@ -1,0 +1,312 @@
+/* ── Base Node Layout ──────────────────────────────────────────────────────── */
+/* The label is centred by the box, not by its own flow position. Left in normal
+ * flow it sat at the top of the node, which reads as "text floating above the
+ * shape" on tall shapes like the diamond and as off-centre text everywhere else.
+ * Every other child (resizer, connect arrows, handles, toolbar portal) is
+ * absolutely positioned, so flex here only ever lays out the label. */
+.flow-node {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Fill the React Flow node box. Without this the shape only grew to fit its
+   * label, so a 160x64 node drew a 33px-tall rectangle: the label looked
+   * off-centre and every edge stopped at the invisible box edge instead of the
+   * shape it was pointing at. */
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  min-width: 120px;
+  min-height: 40px;
+  cursor: grab;
+}
+
+.flow-node:active {
+  cursor: grabbing;
+}
+
+/* ── SVG Shape Background ─────────────────────────────────────────────────── */
+.flow-node__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* ── Label Overlay ─────────────────────────────────────────────────────────── */
+.flow-node__label {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  max-width: 100%;
+  padding: 8px 16px;
+  font-family: var(--mv-font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mv-node-text);
+  text-align: center;
+  line-height: 1.4;
+  pointer-events: auto;
+  user-select: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.flow-node--text-horizontal-left { justify-content: flex-start; }
+.flow-node--text-horizontal-center { justify-content: center; }
+.flow-node--text-horizontal-right { justify-content: flex-end; }
+
+.flow-node--text-vertical-top { align-items: flex-start; }
+.flow-node--text-vertical-center { align-items: center; }
+.flow-node--text-vertical-bottom { align-items: flex-end; }
+
+.flow-node__label--horizontal-left {
+  text-align: left;
+}
+
+.flow-node__label--horizontal-center { text-align: center; }
+
+.flow-node__label--horizontal-right {
+  text-align: right;
+}
+
+.flow-node__media {
+  display: block;
+  width: 28px;
+  height: 28px;
+  margin: 0 auto 4px;
+  object-fit: contain;
+}
+
+.flow-node__icon {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--mv-accent);
+  font-size: 10px;
+}
+
+/* ── Inline Label Editor ───────────────────────────────────────────────────── */
+.flow-node__label-input {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 12px;
+  font-family: var(--mv-font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mv-text-bright);
+  text-align: center;
+  line-height: 1.4;
+  background: var(--mv-bg-overlay);
+  border: 1px solid var(--mv-accent);
+  border-radius: var(--mv-r-sm);
+  outline: none;
+  resize: none;
+  word-break: break-word;
+}
+
+/* Keep inline editing inside the selected shape instead of drawing a second
+ * rectangular field over notes, hexagons, and other non-rectangular nodes. */
+.flow-node__label-input--plain {
+  padding: 8px 16px;
+  color: var(--mv-node-text);
+  background: transparent;
+  border-color: transparent;
+  border-radius: 0;
+  caret-color: var(--mv-accent);
+}
+
+/* ── Shape Variants ────────────────────────────────────────────────────────── */
+
+/* ── Diamond: square container, smaller label ─────────────────────────────── */
+/* No `aspect-ratio` here. The node now fills the box auto-layout reserved for
+ * it, and forcing a square on top of that made a 160x64 node draw a 160x160
+ * diamond that ran straight through its neighbours. The shape stretches to the
+ * box instead, which is also what keeps its points on the handles. */
+.flow-node--diamond {
+  min-height: 0;
+}
+
+.flow-node--diamond .flow-node__label {
+  font-size: 11px;
+  line-height: 1.3;
+  padding: 4px 8px;
+}
+
+/* ── Circle: square container ─────────────────────────────────────────────── */
+.flow-node--circle {
+  min-height: 0;
+}
+
+.flow-node--circle .flow-node__label {
+  padding: 4px 8px;
+}
+
+/* ── Cylinder: taller to show top/bottom caps ─────────────────────────────── */
+.flow-node--cylinder {
+  min-height: 60px;
+}
+
+/* ── Selection State ───────────────────────────────────────────────────────── */
+/* Selection uses handles and controls; keep the node's own border colour calm. */
+
+/* ── Dimming (single selection active) ─────────────────────────────────────── */
+.react-flow__node.dimmed .flow-node {
+  opacity: var(--mv-dimmed-opacity);
+  transition: opacity 0.12s ease;
+}
+
+/* ── Resize Handles ─────────────────────────────────────────────────────────── */
+.react-flow__resize-control.handle {
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--mv-bg-surface) !important;
+  border: 1.5px solid var(--mv-accent) !important;
+  border-radius: 2px !important;
+}
+
+.react-flow__resize-control.line {
+  border-color: var(--mv-accent) !important;
+}
+
+/* ── Connect Arrows (placeholder — Story 3.3 adds spawn behavior) ──────────── */
+.connect-arrows {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.connect-arrow {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mv-bg-elevated);
+  border: 1px solid var(--mv-accent);
+  border-radius: 50%;
+  color: var(--mv-accent);
+  cursor: pointer;
+  font-size: 8px;
+  line-height: 1;
+  pointer-events: all;
+  z-index: var(--mv-z-handles);
+  padding: 0;
+  transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
+}
+
+.connect-arrow::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.connect-arrow:hover {
+  background: var(--mv-bg-elevated);
+  border-color: var(--mv-accent);
+  box-shadow: var(--mv-shadow-sm);
+}
+
+.connect-arrow--top    { top: -32px;    left: 50%; transform: translateX(-50%); }
+.connect-arrow--right  { right: -32px;  top: 50%;  transform: translateY(-50%); }
+.connect-arrow--bottom { bottom: -32px; left: 50%; transform: translateX(-50%); }
+.connect-arrow--left   { left: -32px;   top: 50%;  transform: translateY(-50%); }
+
+.connect-arrow--top:hover    { transform: translateX(-50%) translateY(-2px) scale(1.1); }
+.connect-arrow--right:hover  { transform: translateY(-50%) translateX(2px) scale(1.1); }
+.connect-arrow--bottom:hover { transform: translateX(-50%) translateY(2px) scale(1.1); }
+.connect-arrow--left:hover   { transform: translateY(-50%) translateX(-2px) scale(1.1); }
+
+.connect-arrow--top:active    { transform: translateX(-50%); }
+.connect-arrow--right:active  { transform: translateY(-50%); }
+.connect-arrow--bottom:active { transform: translateX(-50%); }
+.connect-arrow--left:active   { transform: translateY(-50%); }
+
+/* Keep the control visually centred without motion for reduced-motion users. */
+@media (prefers-reduced-motion: reduce) {
+  .connect-arrow {
+    transition: background 0.12s ease, box-shadow 0.12s ease;
+  }
+
+  .connect-arrow--top,
+  .connect-arrow--bottom {
+    left: calc(50% - 10px);
+    transform: none;
+  }
+
+  .connect-arrow--right,
+  .connect-arrow--left {
+    top: calc(50% - 10px);
+    transform: none;
+  }
+
+  .connect-arrow:hover,
+  .connect-arrow:active {
+    transform: none;
+  }
+}
+
+/* ── Connection Handles ─────────────────────────────────────────────────────── */
+.flow-node__handle {
+  width: 10px !important;
+  height: 10px !important;
+  box-sizing: border-box;
+  background: var(--mv-accent) !important;
+  border: 1px solid var(--mv-canvas-bg) !important;
+  border-radius: 50% !important;
+  opacity: 1;
+  pointer-events: all;
+  z-index: var(--mv-z-handles);
+}
+
+.flow-node__floating-handle {
+  width: 1px !important;
+  height: 1px !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Handles only exist for the selected node while the document's Side policy is
+ * active. Keeping them above the SVG makes each midpoint target directly usable. */
+.flow-node--side-attachment-targets .flow-node__handle { z-index: var(--mv-z-handles); }
+
+.flow-node--connection-target {
+  filter: drop-shadow(0 0 0.45rem var(--mv-accent));
+}
+
+.flow-node--connection-target .flow-node__svg path,
+.flow-node--connection-target .flow-node__svg rect,
+.flow-node--connection-target .flow-node__svg circle,
+.flow-node--connection-target .flow-node__svg ellipse,
+.flow-node--connection-target .flow-node__svg polygon {
+  stroke: var(--mv-accent) !important;
+}
+
+/* ── Pending Connect Cursor ─────────────────────────────────────────────────── */
+.canvas--pending-connect .react-flow__pane {
+  cursor: crosshair;
+}
+
+/* ── Hand-drawn node style ──────────────────────────────────────────────── */
+.flow-node--hand-drawn .flow-node__svg path,
+.flow-node--hand-drawn .flow-node__svg rect,
+.flow-node--hand-drawn .flow-node__svg circle,
+.flow-node--hand-drawn .flow-node__svg ellipse,
+.flow-node--hand-drawn .flow-node__svg polygon {
+  stroke-dasharray: 5 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.flow-node__svg :is(path, rect, circle, ellipse, polygon) {
+  stroke-width: var(--flow-node-stroke-width, 2px);
+}
+
+.flow-node--hand-drawn .flow-node__label {
+  font-style: italic;
+}

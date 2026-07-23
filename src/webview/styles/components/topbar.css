@@ -1,0 +1,287 @@
+/* ── TopBar shell ───────────────────────────────────────────────────── */
+.topbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--mv-topbar-height);
+  background: var(--mv-bg-surface);
+  border-bottom: 1px solid var(--mv-border);
+  z-index: var(--mv-z-topbar);
+  flex-shrink: 0;
+  padding: 0 14px;
+}
+
+.app[data-layout-style='modern'] .topbar {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ── Brand section (left) ───────────────────────────────────────────── */
+.topbar__brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.topbar__logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.topbar__name {
+  font-family: 'Apple Chancery', 'Snell Roundhand', 'Segoe Script', 'URW Chancery L', cursive;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--mv-brand-flowforge);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ── Tab group (center, absolutely positioned) ──────────────────────── */
+.topbar__tabs {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.topbar__tab {
+  padding: 5px 12px;
+  font-family: var(--mv-font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--mv-text-secondary);
+  background: var(--mv-transparent);
+  border: 1px solid var(--mv-transparent);
+  border-radius: var(--mv-r-sm);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  white-space: nowrap;
+}
+
+.topbar__tab:hover {
+  background: var(--mv-bg-hover);
+  color: var(--mv-text-primary);
+}
+
+.topbar__tab--active {
+  background: var(--mv-accent-dim);
+  border-color: var(--mv-accent-mid);
+  color: var(--mv-text-bright);
+}
+
+.topbar__tab--active:hover {
+  background: var(--mv-accent-dim);
+  color: var(--mv-text-bright);
+}
+
+/* ── Actions section (right) ────────────────────────────────────────── */
+.topbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.topbar__btn {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--mv-text-secondary);
+  background: var(--mv-transparent);
+  border: 1px solid var(--mv-transparent);
+  border-radius: var(--mv-r-sm);
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.topbar__btn:hover:not(:disabled) {
+  background: var(--mv-bg-hover);
+  color: var(--mv-text-primary);
+}
+
+.topbar__btn:disabled {
+  color: var(--mv-text-dim);
+  cursor: not-allowed;
+}
+
+.topbar__icon {
+  width: 15px;
+  height: 15px;
+}
+
+.topbar__btn--active {
+  background: var(--mv-bg-hover);
+  color: var(--mv-text-primary);
+}
+
+.topbar__save-control {
+  position: relative;
+}
+
+.topbar__conflict-notifier {
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 26px;
+  padding: 3px 5px 3px 8px;
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r-md);
+  background: var(--mv-bg-elevated);
+  box-shadow: var(--mv-shadow-md);
+  color: var(--mv-text-secondary);
+  font-size: 11px;
+  line-height: 1;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.topbar__conflict-message::before {
+  content: '•';
+  margin-right: 4px;
+  color: var(--mv-yellow);
+  font-size: 15px;
+  line-height: 0;
+  vertical-align: -1px;
+}
+
+.topbar__conflict-action {
+  min-height: 20px;
+  padding: 0 6px;
+  border: 1px solid var(--mv-transparent);
+  border-radius: var(--mv-r-sm);
+  background: var(--mv-transparent);
+  color: var(--mv-text-primary);
+  font-family: var(--mv-font-ui);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.topbar__conflict-action:hover,
+.topbar__conflict-action:focus-visible {
+  border-color: var(--mv-accent-mid);
+  background: var(--mv-accent-dim);
+  color: var(--mv-text-bright);
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  .topbar__conflict-notifier {
+    right: 0;
+    top: calc(100% + 6px);
+    transform: none;
+    z-index: 501;
+  }
+
+  .topbar__conflict-message {
+    font-size: 0;
+  }
+
+  .topbar__conflict-message::before {
+    margin-right: 0;
+  }
+}
+
+.topbar__dirty-indicator {
+  position: absolute;
+  bottom: 1px;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--mv-bg-surface);
+  border-radius: 50%;
+  background: var(--mv-yellow);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.topbar__theme-picker {
+  position: relative;
+}
+
+.topbar__theme-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: var(--mv-bg-elevated);
+  border: 1px solid var(--mv-border);
+  border-radius: var(--mv-r-md);
+  box-shadow: var(--mv-shadow-md);
+  min-width: 120px;
+  z-index: 500;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.topbar__theme-option {
+  width: 100%;
+  padding: 6px 10px;
+  text-align: left;
+  background: var(--mv-transparent);
+  border: none;
+  border-radius: var(--mv-r-sm);
+  color: var(--mv-text-primary);
+  font-family: var(--mv-font-ui);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.topbar__theme-option:hover {
+  background: var(--mv-bg-hover);
+  color: var(--mv-text-bright);
+}
+
+.topbar__theme-option--active {
+  color: var(--mv-accent);
+  background: var(--mv-accent-dim);
+  font-weight: 600;
+}
+
+.topbar__theme-option--active::after {
+  content: '✓';
+  float: right;
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    height: auto;
+    min-height: var(--mv-topbar-height);
+    flex-wrap: wrap;
+    row-gap: 4px;
+    padding-block: 4px;
+  }
+
+  .topbar__brand {
+    order: 1;
+  }
+
+  .topbar__actions {
+    order: 2;
+  }
+
+  .topbar__tabs {
+    position: static;
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    transform: none;
+  }
+}

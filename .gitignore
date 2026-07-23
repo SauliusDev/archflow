@@ -1,0 +1,55 @@
+# Blueprint & planning (local only)
+_blueprint/
+_refs/
+_bmad/
+_bmad-output/
+_notes/
+docs/
+
+# Coding agents 
+.claude/
+.cursor/
+.gemini/
+.agent/
+.vscode/
+.github/
+
+# Agent runtime state (outside .claude/ for autonomous write access)
+_mind/
+_imp/
+
+# Dependencies
+node_modules/
+
+# Build output
+out/
+dist/
+.next/
+.vscode-test/
+artifacts/
+*.tsbuildinfo
+*.vsix
+*.psd
+
+# Env
+.env
+.env.local
+.env*.local
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+_board/
+.claude/
+.agents/
+.bmad-loop/
+.codex/
+.playwright-mcp/
+.superpowers/
+package-lock.json
+.bmad-loop/runs/
+.bmad-loop/cache/
+.bmad-loop/policy.toml

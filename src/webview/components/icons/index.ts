@@ -1,0 +1,7 @@
+export { FormatAlignCenterIcon } from './format-align-center'
+export { FormatAlignLeftIcon } from './format-align-left'
+export { FormatAlignRightIcon } from './format-align-right'
+export { VerticalAlignBottomIcon } from './vertical-align-bottom'
+export { VerticalAlignCenterIcon } from './vertical-align-center'
+export { VerticalAlignTopIcon } from './vertical-align-top'
+export { ScratchpadAddIcon } from './scratchpad-add'

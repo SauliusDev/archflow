@@ -1,0 +1,81 @@
+/* Adaptive theme — map the complete editor palette to VS Code's webview tokens. */
+:root[data-theme="vscode-adaptive"] {
+  --mv-bg-deep: var(--vscode-editor-background, #121314);
+  --mv-canvas-bg: var(--vscode-editor-background, #121314);
+  --mv-bg-surface: var(--vscode-editorGroupHeader-tabsBackground, var(--vscode-sideBar-background, #191a1b));
+  --mv-bg-elevated: var(--vscode-editorWidget-background, var(--vscode-editor-background, #202122));
+  --mv-bg-overlay: var(--vscode-input-background, var(--vscode-editorWidget-background, #242526));
+  --mv-bg-hover: var(--vscode-list-hoverBackground, rgba(255, 255, 255, 0.05));
+  --mv-glass-bg: var(--vscode-editorWidget-background, rgba(25, 26, 27, 0.92));
+  --mv-glass-bg-heavy: var(--vscode-editorWidget-background, rgba(25, 26, 27, 0.96));
+  /* Keep the no-color-mix fallback translucent so the modal still has context. */
+  --mv-backdrop: rgba(0, 0, 0, 0.45);
+
+  --mv-text-bright: var(--vscode-foreground, #ededed);
+  --mv-text-primary: var(--vscode-editor-foreground, var(--vscode-foreground, #bfbfbf));
+  --mv-text-secondary: var(--vscode-descriptionForeground, var(--vscode-editor-foreground, #8c8c8c));
+  --mv-text-dim: var(--vscode-disabledForeground, var(--vscode-descriptionForeground, #555555));
+  --mv-brand-flowforge: var(--vscode-textLink-foreground, var(--vscode-focusBorder, var(--vscode-foreground, #004baf)));
+
+  --mv-accent: var(--vscode-focusBorder, var(--vscode-textLink-foreground, #3994bc));
+  --mv-accent-dim: var(--vscode-list-inactiveSelectionBackground, var(--vscode-list-hoverBackground, #1f2f35));
+  --mv-accent-mid: var(--vscode-list-activeSelectionBackground, var(--vscode-list-hoverBackground, #29434e));
+  --mv-border: var(--vscode-contrastBorder, var(--vscode-panel-border, var(--vscode-widget-border, #2a2b2c)));
+  --mv-border-light: var(--vscode-contrastBorder, var(--vscode-widget-border, var(--vscode-panel-border, #333536)));
+  --mv-border-focus: var(--vscode-focusBorder, #3994bc);
+
+  --mv-green: var(--vscode-testing-iconPassed, #72c892);
+  --mv-yellow: var(--vscode-editorWarning-foreground, #e5ba7d);
+  --mv-red: var(--vscode-editorError-foreground, #f48771);
+  --mv-danger-bg: var(--vscode-inputValidation-errorBackground, #442525);
+
+  --mv-syntax-keyword: var(--vscode-symbolIcon-keywordForeground, #ff7b72);
+  --mv-syntax-string: var(--vscode-debugTokenExpression-string, #a5d6ff);
+  --mv-syntax-function: var(--vscode-symbolIcon-functionForeground, #d2a8ff);
+  --mv-syntax-identifier: var(--vscode-symbolIcon-variableForeground, #ffa657);
+  --mv-syntax-comment: var(--vscode-editorCodeLens-foreground, #8b949e);
+  --mv-syntax-tag: var(--vscode-symbolIcon-classForeground, #7ee787);
+  --mv-syntax-plain: var(--vscode-editor-foreground, #c9d1d9);
+
+  --mv-node-fill: var(--vscode-editorWidget-background, var(--vscode-editor-background, #1e2022));
+  --mv-node-stroke: var(--vscode-panel-border, #3a3c3e);
+  --mv-node-text: var(--vscode-editor-foreground, #bfbfbf);
+  --mv-node-selected: var(--vscode-focusBorder, #3994bc);
+  --mv-node-color-1: var(--mv-node-fill);
+  --mv-node-color-2: var(--vscode-editor-selectionBackground, #1e2a3a);
+  --mv-node-color-3: var(--vscode-diffEditor-insertedTextBackground, #1e2a22);
+  --mv-node-color-4: var(--vscode-textBlockQuote-background, #2a1e2a);
+  --mv-node-color-5: var(--vscode-editorWarning-background, #2a221e);
+  --mv-node-color-6: var(--vscode-editor-findMatchBackground, #2a2a1e);
+  --mv-node-color-7: var(--vscode-editorInfo-background, #1e2a2a);
+  --mv-node-color-8: var(--vscode-editorError-background, #2a1e22);
+
+  --mv-edge-stroke: var(--vscode-graph-foreground, var(--vscode-panel-border, #4a4d50));
+  --mv-edge-selected: var(--vscode-focusBorder, #3994bc);
+  --mv-subgraph-fill: var(--vscode-editorWidget-background, #1e2022);
+  --mv-subgraph-stroke: var(--vscode-panel-border, #3a3c3e);
+  --mv-subgraph-header-bg: var(--vscode-editorGroupHeader-tabsBackground, #191a1b);
+  --mv-dot-color: var(--vscode-editorRuler-foreground, #3a3c3e);
+  --mv-hover-bg: var(--vscode-list-hoverBackground, #202122);
+  --mv-focus-ring: var(--vscode-focusBorder, #3994bc);
+  --mv-panel-bg: var(--vscode-sideBar-background, var(--vscode-editorGroupHeader-tabsBackground, #191a1b));
+  --mv-input-bg: var(--vscode-input-background, #242526);
+  --mv-text: var(--vscode-editor-foreground, #bfbfbf);
+  --mv-shadow-sm: 0 1px 3px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.4));
+  --mv-shadow-md: 0 4px 16px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.5));
+  --mv-shadow-lg: 0 8px 32px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.6));
+  --mv-shadow-bar: 0 2px 12px var(--vscode-widget-shadow, rgba(0, 0, 0, 0.6));
+}
+
+@supports (background: color-mix(in srgb, #000, #fff)) {
+  :root[data-theme="vscode-adaptive"] {
+    --mv-backdrop: color-mix(in srgb, var(--vscode-editor-background, #121314) 70%, transparent);
+    --mv-accent-dim: color-mix(in srgb, var(--vscode-focusBorder, #3994bc) 15%, transparent);
+    --mv-accent-mid: color-mix(in srgb, var(--vscode-focusBorder, #3994bc) 30%, transparent);
+    --mv-danger-bg: color-mix(in srgb, var(--vscode-editorError-foreground, #f48771) 15%, transparent);
+    --mv-subgraph-fill: color-mix(in srgb, var(--vscode-editor-foreground, #ededed) 3%, transparent);
+    --mv-subgraph-header-bg: color-mix(in srgb, var(--vscode-editor-foreground, #ededed) 2%, transparent);
+    --mv-dot-color: color-mix(in srgb, var(--vscode-editor-foreground, #ededed) 6%, transparent);
+    --mv-hover-bg: var(--vscode-list-hoverBackground, color-mix(in srgb, var(--vscode-focusBorder, #3994bc) 8%, transparent));
+  }
+}
