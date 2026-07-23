@@ -81,6 +81,7 @@ describe('CanvasSidebar', () => {
 
     expect(trigger.getAttribute('aria-expanded')).toBe('true')
     expect(trigger.parentElement?.getAttribute('data-tooltip')).toBeNull()
+    expect(trigger.parentElement?.classList.contains('canvas-control-tooltip')).toBe(false)
     expect(screen.getByRole('menu')).toBeTruthy()
     expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual(['Straight', 'Orthogonal', 'Curved'])
 

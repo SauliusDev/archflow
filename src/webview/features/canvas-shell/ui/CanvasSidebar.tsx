@@ -79,7 +79,10 @@ export default function CanvasSidebar(): React.JSX.Element {
         <span className="canvas-control-tooltip canvas-control-tooltip--right" data-tooltip="Add a group">
           <button className="canvas-sidebar__btn" aria-label="Add Subgraph" onClick={addSubgraph}>⊞</button>
         </span>
-        <span className="canvas-sidebar__route-menu-wrap canvas-sidebar__disabled-help canvas-control-tooltip canvas-control-tooltip--right" data-tooltip={routeMenuOpen ? undefined : 'Change all edge routes'}>
+        <span
+          className={`canvas-sidebar__route-menu-wrap canvas-sidebar__disabled-help${routeMenuOpen ? '' : ' canvas-control-tooltip canvas-control-tooltip--right'}`}
+          data-tooltip={routeMenuOpen ? undefined : 'Change all edge routes'}
+        >
           <button
             ref={routeMenuBtnRef}
             className={`canvas-sidebar__btn${routeMenuOpen ? ' canvas-sidebar__btn--active' : ''}`}
