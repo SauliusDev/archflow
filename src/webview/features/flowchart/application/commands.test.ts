@@ -363,6 +363,19 @@ describe('executeFlowchartCommand', () => {
     expect(curved.value.history.past).toHaveLength(2)
   })
 
+  it('treats a persisted matching bulk route layout as a no-op regardless of property order', () => {
+    const source = 'flowchart LR\n  A[Alpha]\n  B[Beta]\n  A e1@--> B\n'
+    const current = createDocumentSession('bulk-edge-route-property-order', 1, flowchartCompatibilityAdapter.parse(source, 1), {
+      ...layout,
+      edges: { 'edge:e1': { sourceSide: 'right', routeMode: 'curved', targetSide: 'left' } },
+    })
+
+    const result = executeFlowchartEdgeRoutingCommand(current, { kind: 'set-all-modes', routeMode: 'curved' }, dependencies)
+
+    expect(result).toMatchObject({ ok: false, code: 'invalid-operation' })
+    expect(current.history.past).toHaveLength(0)
+  })
+
   it('materializes source-import geometry and keeps a clean session base layout aligned', () => {
     const current = session()
     const materialized = materializeFlowchartSourceImportLayout(current, [node('A', 72, 48), node('B', 216, 48)])

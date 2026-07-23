@@ -87,6 +87,22 @@ function invalidOperationFailure(error: unknown): CommandResult<never> {
   }
 }
 
+function layoutValuesEqual(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left) && Array.isArray(right)
+      && left.length === right.length
+      && left.every((value, index) => layoutValuesEqual(value, right[index]))
+  }
+  if (!left || !right || typeof left !== 'object' || typeof right !== 'object') return false
+  const leftRecord = left as Record<string, unknown>
+  const rightRecord = right as Record<string, unknown>
+  const leftKeys = Object.keys(leftRecord)
+  const rightKeys = Object.keys(rightRecord)
+  return leftKeys.length === rightKeys.length
+    && leftKeys.every(key => Object.prototype.hasOwnProperty.call(rightRecord, key) && layoutValuesEqual(leftRecord[key], rightRecord[key]))
+}
+
 function semanticPlanningFailure(error: unknown): CommandResult<never> {
   return error instanceof SemanticValidationError ? invalidOperationFailure(error) : failure(error)
 }
@@ -364,7 +380,7 @@ export function executeFlowchartEdgeRoutingCommand(
         routeMode: request.routeMode,
         ...(request.routeMode === 'orthogonal' && waypoints ? { waypoints } : {}),
       }
-      if (JSON.stringify(current) !== JSON.stringify(next)) changed = true
+      if (!layoutValuesEqual(current, next)) changed = true
       edges[connector.id] = next
     }
     if (!changed) return { ok: false, code: 'invalid-operation', message: 'Route modes did not change' }
