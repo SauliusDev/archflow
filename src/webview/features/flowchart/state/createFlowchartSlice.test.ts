@@ -271,6 +271,15 @@ describe('createFlowchartSlice edge defaults', () => {
     useStore.setState({ edges: [edge], history: { past: [], future: [] } })
     useStore.getState().setAllEdgeRouteModes('curved')
     expect(useStore.getState().history.past).toHaveLength(0)
+
+    useStore.setState({
+      edges: [makeEdge('e-b-c', 'b', 'c', {
+        data: { style: 'arrow', routeMode: 'curved', sourceSide: 'right', targetSide: 'left' },
+      })],
+      history: { past: [], future: [] },
+    })
+    useStore.getState().setAllEdgeRouteModes('curved')
+    expect(useStore.getState().history.past).toHaveLength(0)
   })
 
   it('persists document-wide routes and announces a successful update', () => {
@@ -291,6 +300,25 @@ describe('createFlowchartSlice edge defaults', () => {
     })
     expect(useStore.getState().announcement).toBe('Routed all edges as curved')
     expect(useStore.getState().documentSession?.history.past).toHaveLength(1)
+  })
+
+  it('silently ignores an unchanged document route command but reports other command failures', () => {
+    const source = 'flowchart LR\n  A[Alpha]\n  B[Beta]\n  A e1@--> B\n'
+    const projection = flowchartCompatibilityAdapter.parse(source, 1)
+    const layout: LayoutStateV2 = {
+      version: 2, diagramFamily: 'flowchart', viewport: { x: 0, y: 0, zoom: 1 }, elements: {},
+      edges: { 'edge:e1': { routeMode: 'curved' } }, constraints: [],
+    }
+    useStore.getState().initializeDocumentSession(createDocumentSession('bulk-route-failure', 1, projection, layout))
+    useStore.getState().importFromCode(projection.model)
+    useStore.setState({ announcement: 'Existing announcement' })
+
+    useStore.getState().setAllEdgeRouteModes('curved')
+    expect(useStore.getState().announcement).toBe('Existing announcement')
+
+    useStore.setState({ documentSession: { ...useStore.getState().documentSession!, conflict: { eventId: 'external' } } as never, announcement: null })
+    useStore.getState().setAllEdgeRouteModes('straight')
+    expect(useStore.getState().announcement).toBe('Resolve external changes before editing.')
   })
 })
 

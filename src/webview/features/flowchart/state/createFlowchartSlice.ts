@@ -215,6 +215,23 @@ function duplicateNodeColorOperation(node: Node<FlowNodeData>): FlowchartSemanti
   return { kind: "update-node-colors", id: node.id, fillColor, strokeColor, strokeWidth, textColor };
 }
 
+function legacyRouteDataEqual(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true;
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left) && Array.isArray(right)
+      && left.length === right.length
+      && left.every((value, index) => legacyRouteDataEqual(value, right[index]));
+  }
+  if (!left || !right || typeof left !== "object" || typeof right !== "object") return false;
+  const leftRecord = left as Record<string, unknown>;
+  const rightRecord = right as Record<string, unknown>;
+  const leftKeys = Object.keys(leftRecord);
+  const rightKeys = Object.keys(rightRecord);
+  return leftKeys.length === rightKeys.length
+    && leftKeys.every((key) => Object.prototype.hasOwnProperty.call(rightRecord, key)
+      && legacyRouteDataEqual(leftRecord[key], rightRecord[key]));
+}
+
 export function commitFlowchartSemanticOperations(
   session: DocumentSession,
   operations: readonly FlowchartSemanticOperation[],
@@ -708,7 +725,7 @@ export const createFlowchartSlice: StateCreator<
           routeMode,
           ...(routeMode === "orthogonal" && waypoints ? { waypoints } : {}),
         };
-        return JSON.stringify(edge.data) === JSON.stringify(data) ? edge : { ...edge, data };
+        return legacyRouteDataEqual(edge.data, data) ? edge : { ...edge, data };
       });
       if (nextEdges.every((edge, index) => edge === edges[index])) return;
       get().commitLegacyHistory({ nodes, edges: nextEdges });
