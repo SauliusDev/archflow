@@ -59,8 +59,7 @@
   top: 50%;
   z-index: 1;
   display: flex;
-  flex-direction: column;
-  width: 132px;
+  gap: 2px;
   padding: 4px;
   transform: translateY(-50%);
   background: var(--mv-glass-bg);
@@ -71,15 +70,27 @@
 }
 
 .canvas-sidebar__route-menu button {
-  width: 100%;
-  padding: 7px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   border: 0;
   border-radius: var(--mv-r-sm);
   background: transparent;
   color: var(--mv-text-secondary);
   cursor: pointer;
-  font: inherit;
-  text-align: left;
+}
+
+.canvas-sidebar__route-preview {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
 }
 
 .canvas-sidebar__route-menu button:hover,

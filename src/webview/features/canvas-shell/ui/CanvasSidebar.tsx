@@ -4,6 +4,12 @@ import { useShallow } from 'zustand/react/shallow'
 import { useStore } from '@/state/createStore'
 import { Palette } from '@/features/flowchart'
 
+const ROUTE_OPTIONS = [
+  { mode: 'straight', label: 'Straight', path: 'M2 12H22' },
+  { mode: 'orthogonal', label: 'Orthogonal', path: 'M2 5H12V19H22' },
+  { mode: 'curved', label: 'Curved', path: 'M2 19C8 3 16 3 22 19' },
+] as const
+
 export default function CanvasSidebar(): React.JSX.Element {
   const { fitView } = useReactFlow()
 
@@ -96,9 +102,17 @@ export default function CanvasSidebar(): React.JSX.Element {
           </button>
           {routeMenuOpen && (
             <div className="canvas-sidebar__route-menu" role="menu" aria-label="Change all edge routes">
-              {(['straight', 'orthogonal', 'curved'] as const).map(routeMode => (
-                <button key={routeMode} role="menuitem" onClick={() => handleChangeAllEdgeRoutes(routeMode)}>
-                  {routeMode[0].toUpperCase() + routeMode.slice(1)}
+              {ROUTE_OPTIONS.map(({ mode, label, path }) => (
+                <button
+                  key={mode}
+                  role="menuitem"
+                  aria-label={`${label} edge routing`}
+                  title={`${label} routing`}
+                  onClick={() => handleChangeAllEdgeRoutes(mode)}
+                >
+                  <svg className="canvas-sidebar__route-preview" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d={path} />
+                  </svg>
                 </button>
               ))}
             </div>

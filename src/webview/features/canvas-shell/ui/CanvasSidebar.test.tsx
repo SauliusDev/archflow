@@ -83,9 +83,13 @@ describe('CanvasSidebar', () => {
     expect(trigger.parentElement?.getAttribute('data-tooltip')).toBeNull()
     expect(trigger.parentElement?.classList.contains('canvas-control-tooltip')).toBe(false)
     expect(screen.getByRole('menu')).toBeTruthy()
-    expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual(['Straight', 'Orthogonal', 'Curved'])
+    expect(screen.getAllByRole('menuitem').map(item => item.getAttribute('aria-label'))).toEqual([
+      'Straight edge routing',
+      'Orthogonal edge routing',
+      'Curved edge routing',
+    ])
 
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Orthogonal' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Orthogonal edge routing' }))
 
     expect(setAllEdgeRouteModes).toHaveBeenCalledWith('orthogonal')
     expect(screen.queryByRole('menu')).toBeNull()
