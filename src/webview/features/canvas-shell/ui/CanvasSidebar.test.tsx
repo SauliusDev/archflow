@@ -63,6 +63,44 @@ describe('CanvasSidebar', () => {
     expect(screen.getByRole('button', { name: 'Zoom to Fit' })).toBeTruthy()
   })
 
+  it('opens the bulk edge route menu and applies the selected route mode', () => {
+    const setAllEdgeRouteModes = vi.fn()
+    useStore.setState({
+      edges: [{ id: 'e-A-B', source: 'A', target: 'B', data: { style: 'arrow' } }],
+      isLocked: false,
+      setAllEdgeRouteModes,
+    } as never)
+
+    render(<CanvasSidebar />)
+    const trigger = screen.getByRole('button', { name: 'Change all edge routes' })
+    expect(trigger.getAttribute('aria-haspopup')).toBe('menu')
+    expect(trigger.getAttribute('aria-expanded')).toBe('false')
+    expect(trigger.parentElement?.getAttribute('data-tooltip')).toBeTruthy()
+
+    fireEvent.click(trigger)
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('true')
+    expect(screen.getByRole('menu')).toBeTruthy()
+    expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual(['Straight', 'Orthogonal', 'Curved'])
+
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Orthogonal' }))
+
+    expect(setAllEdgeRouteModes).toHaveBeenCalledWith('orthogonal')
+    expect(screen.queryByRole('menu')).toBeNull()
+    expect(document.activeElement).toBe(trigger)
+  })
+
+  it.each([
+    ['locked', { isLocked: true, edges: [{ id: 'e-A-B', source: 'A', target: 'B', data: { style: 'arrow' } }] }],
+    ['there are no edges', { isLocked: false, edges: [] }],
+  ])('disables bulk edge route changes when %s', (_state, storeState) => {
+    useStore.setState(storeState as never)
+
+    render(<CanvasSidebar />)
+
+    expect((screen.getByRole('button', { name: 'Change all edge routes' }) as HTMLButtonElement).disabled).toBe(true)
+  })
+
   it('toggles the persisted inspector visibility with an accessible active control', () => {
     const projection = flowchartCompatibilityAdapter.parse('flowchart LR\n  A[Alpha]\n', 1)
     useStore.getState().initializeDocumentSession(createDocumentSession('sidebar-inspector', 1, projection, {

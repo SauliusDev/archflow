@@ -8,9 +8,12 @@ export default function CanvasSidebar(): React.JSX.Element {
   const { fitView } = useReactFlow()
 
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const [routeMenuOpen, setRouteMenuOpen] = useState(false)
   const addNodeBtnRef = useRef<HTMLButtonElement>(null)
+  const routeMenuBtnRef = useRef<HTMLButtonElement>(null)
 
   const nodes = useStore(s => s.nodes)
+  const edges = useStore(s => s.edges)
   const past = useStore(s => s.history.past)
   const future = useStore(s => s.history.future)
   const documentSession = useStore(s => s.documentSession)
@@ -18,23 +21,35 @@ export default function CanvasSidebar(): React.JSX.Element {
   const inspectorVisible = documentSession?.layout.inspectorVisible !== false
 
 
-  const { addSubgraph, applyAutoLayout, undo, redo, setInspectorVisible } = useStore(
+  const { addSubgraph, applyAutoLayout, undo, redo, setInspectorVisible, setAllEdgeRouteModes } = useStore(
     useShallow(s => ({
       addSubgraph: s.addSubgraph,
       applyAutoLayout: s.applyAutoLayout,
       undo: s.undo,
       redo: s.redo,
       setInspectorVisible: s.setInspectorVisible,
+      setAllEdgeRouteModes: s.setAllEdgeRouteModes,
     }))
   )
 
   const canUndo = !isLocked && !documentSession?.conflict && (documentSession ? documentSession.history.past.length > 0 : past.length > 0)
   const canRedo = !isLocked && !documentSession?.conflict && (documentSession ? documentSession.history.future.length > 0 : future.length > 0)
+  const canChangeAllEdgeRoutes = !isLocked && edges.length > 0
 
   const handlePaletteClose = useCallback(function handlePaletteClose(): void {
     setPaletteOpen(false)
     addNodeBtnRef.current?.focus()
   }, [])
+
+  const handleRouteMenuClose = useCallback(function handleRouteMenuClose(): void {
+    setRouteMenuOpen(false)
+    routeMenuBtnRef.current?.focus()
+  }, [])
+
+  function handleChangeAllEdgeRoutes(routeMode: 'straight' | 'orthogonal' | 'curved'): void {
+    setAllEdgeRouteModes(routeMode)
+    handleRouteMenuClose()
+  }
 
   function handleAutoLayout(): void {
     if (nodes.length === 0) return
@@ -63,6 +78,28 @@ export default function CanvasSidebar(): React.JSX.Element {
         </span>
         <span className="canvas-control-tooltip canvas-control-tooltip--right" data-tooltip="Add a group">
           <button className="canvas-sidebar__btn" aria-label="Add Subgraph" onClick={addSubgraph}>⊞</button>
+        </span>
+        <span className="canvas-sidebar__route-menu-wrap canvas-sidebar__disabled-help canvas-control-tooltip canvas-control-tooltip--right" data-tooltip="Change all edge routes">
+          <button
+            ref={routeMenuBtnRef}
+            className={`canvas-sidebar__btn${routeMenuOpen ? ' canvas-sidebar__btn--active' : ''}`}
+            aria-label="Change all edge routes"
+            aria-expanded={routeMenuOpen}
+            aria-haspopup="menu"
+            disabled={!canChangeAllEdgeRoutes}
+            onClick={() => setRouteMenuOpen(open => !open)}
+          >
+            ⤴
+          </button>
+          {routeMenuOpen && (
+            <div className="canvas-sidebar__route-menu" role="menu" aria-label="Change all edge routes">
+              {(['straight', 'orthogonal', 'curved'] as const).map(routeMode => (
+                <button key={routeMode} role="menuitem" onClick={() => handleChangeAllEdgeRoutes(routeMode)}>
+                  {routeMode[0].toUpperCase() + routeMode.slice(1)}
+                </button>
+              ))}
+            </div>
+          )}
         </span>
         <div className="canvas-sidebar__divider" aria-hidden="true" />
         <span className="canvas-sidebar__disabled-help canvas-control-tooltip canvas-control-tooltip--right" data-tooltip="Undo last change">
