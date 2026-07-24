@@ -8,7 +8,6 @@ vi.mock('@xyflow/react', () => ({
   Position: { Left: 'left', Right: 'right', Top: 'top', Bottom: 'bottom' },
   getStraightPath: vi.fn(() => ['M0,0 L100,100', 50, 50]),
   getSmoothStepPath: vi.fn(() => ['M0,0 L0,100 L100,100', 50, 50]),
-  getBezierPath: vi.fn(() => ['M0,0 C25,0 75,100 100,100', 50, 50]),
   useReactFlow: vi.fn(() => ({ screenToFlowPosition: (point: { x: number; y: number }) => point })),
   useInternalNode: vi.fn((id: string) => ({
     id,
@@ -35,7 +34,7 @@ vi.mock('@xyflow/react', () => ({
 
 import FlowEdge from './FlowEdge'
 import { useStore } from '@/state/createStore'
-import { getBezierPath, getSmoothStepPath, getStraightPath, Position, useInternalNode } from '@xyflow/react'
+import { getSmoothStepPath, getStraightPath, Position, useInternalNode } from '@xyflow/react'
 import { mockReactFlow } from '../../../setupTests'
 import { SmartRoutingContext } from './SmartRoutingContext'
 
@@ -55,15 +54,38 @@ const baseProps = {
   selected: false,
 }
 
+function expectCompactDirectionalCubic(path: string, endpoints?: { sx: number; sy: number; tx: number; ty: number }): void {
+  const values = path.match(/-?\d+(?:\.\d+)?/g)?.map(Number)
+  expect(values).toHaveLength(8)
+  if (!values || values.length !== 8) return
+  const [sx, sy, controlAX, controlAY, controlBX, controlBY, tx, ty] = values
+  if (endpoints) expect({ sx, sy, tx, ty }).toEqual(endpoints)
+  const dx = tx - sx
+  const dy = ty - sy
+  expect(Math.abs((controlAX - sx) * dy - (controlAY - sy) * dx)).toBeGreaterThan(0.0001)
+  expect(Math.abs((tx - controlBX) * dy - (ty - controlBY) * dx)).toBeGreaterThan(0.0001)
+  expect((controlAX - sx) * dx + (controlAY - sy) * dy).toBeGreaterThan(0)
+  expect((tx - controlBX) * dx + (ty - controlBY) * dy).toBeGreaterThan(0)
+  expect(Math.hypot(controlAX - sx, controlAY - sy)).toBeGreaterThanOrEqual(20)
+  expect(Math.hypot(controlAX - sx, controlAY - sy)).toBeLessThanOrEqual(55)
+  expect(Math.hypot(tx - controlBX, ty - controlBY)).toBeGreaterThanOrEqual(20)
+  expect(Math.hypot(tx - controlBX, ty - controlBY)).toBeLessThanOrEqual(55)
+}
+
 describe('FlowEdge', () => {
   beforeEach(() => {
-    useStore.setState({ edges: [], nodes: [], history: { past: [], future: [] }, isLocked: false, updateEdgeLabel: vi.fn() } as never)
+    useStore.setState({
+      edges: [{ id: 'e-A-B', source: 'A', target: 'B', selected: true, data: { style: 'arrow' } }],
+      nodes: [],
+      history: { past: [], future: [] },
+      isLocked: false,
+      updateEdgeLabel: vi.fn(),
+    } as never)
     vi.mocked(useInternalNode).mockImplementation((id: string) => ({
       id,
       measured: { width: 100, height: 40 },
       internals: { positionAbsolute: id === 'A' ? { x: 0, y: 0 } : { x: 200, y: 200 } },
     }) as never)
-    vi.mocked(getBezierPath).mockReturnValue(['M0,0 C25,0 75,100 100,100', 50, 50])
     vi.mocked(getSmoothStepPath).mockReturnValue(['M0,0 L0,100 L100,100', 50, 50])
     vi.mocked(getStraightPath).mockReturnValue(['M0,0 L100,100', 50, 50])
   })
@@ -100,6 +122,48 @@ describe('FlowEdge', () => {
     }
   })
 
+  it('keeps controls and selected path styling for the sole selected edge', () => {
+    render(<FlowEdge {...baseProps} selected />)
+
+    expect(screen.getByTestId('base-edge').getAttribute('data-class')).toContain('flow-edge__path--selected')
+    expect(screen.getByTitle('Solid arrow')).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Drag source endpoint' })).toBeTruthy()
+    expect(screen.getByText('✎')).toBeTruthy()
+  })
+
+  it('keeps multiple selected edge paths highlighted but hides every edge control', () => {
+    useStore.setState({
+      edges: [
+        { id: 'e-A-B', source: 'A', target: 'B', selected: true, data: { style: 'arrow', routeMode: 'orthogonal', waypoints: [{ x: 40, y: 50 }] } },
+        { id: 'e-B-A', source: 'B', target: 'A', selected: true, data: { style: 'arrow' } },
+      ],
+    } as never)
+
+    render(<>
+      <FlowEdge {...baseProps} selected data={{ style: 'arrow', routeMode: 'orthogonal', waypoints: [{ x: 40, y: 50 }] }} />
+      <FlowEdge {...baseProps} id="e-B-A" source="B" target="A" selected />
+    </>)
+
+    expect(screen.getAllByTestId('base-edge')).toHaveLength(2)
+    for (const path of screen.getAllByTestId('base-edge')) {
+      expect(path.getAttribute('data-class')).toContain('flow-edge__path--selected')
+    }
+    expect(screen.queryAllByRole('button')).toHaveLength(0)
+    expect(screen.queryByText('✎')).toBeNull()
+  })
+
+  it('keeps a mixed selected edge highlighted but hides every edge control', () => {
+    useStore.setState({
+      nodes: [{ id: 'node-1', selected: true, position: { x: 0, y: 0 }, data: { label: 'Node', shape: 'rectangle' } }],
+    } as never)
+
+    render(<FlowEdge {...baseProps} selected />)
+
+    expect(screen.getByTestId('base-edge').getAttribute('data-class')).toContain('flow-edge__path--selected')
+    expect(screen.queryAllByRole('button')).toHaveLength(0)
+    expect(screen.queryByText('✎')).toBeNull()
+  })
+
   it('offers only named explicit route controls with distinct vector previews', () => {
     render(<FlowEdge {...baseProps} selected />)
 
@@ -134,7 +198,6 @@ describe('FlowEdge', () => {
   it.each([
     ['straight', 'M0,0 L100,100'],
     ['orthogonal', 'M0,0 L0,100 L100,100'],
-    ['curved', 'M0,0 C25,0 75,100 100,100'],
     ['manual', 'M0,0 L0,100 L100,100'],
     ['automatic', 'M0,0 L100,100'],
   ] as const)('renders %s with its intended geometry', (routeMode, path) => {
@@ -155,25 +218,19 @@ describe('FlowEdge', () => {
     expect(screen.getByTestId('base-edge').getAttribute('d')).toMatch(/^M .* C /)
   })
 
-  it('uses the floating attachment sides for curved geometry', () => {
+  it('renders a compact directional cubic for free curved geometry', () => {
     render(<FlowEdge {...baseProps} data={{ style: 'arrow', routeMode: 'curved' }} />)
 
-    expect(getBezierPath).toHaveBeenCalledWith(expect.objectContaining({
-      sourcePosition: Position.Bottom,
-      targetPosition: Position.Top,
-    }))
+    expectCompactDirectionalCubic(screen.getByTestId('base-edge').getAttribute('d')!, { sx: 70, sy: 40, tx: 230, ty: 200 })
   })
 
-  it('uses persisted fixed attachment sides for curved geometry in Side mode', () => {
+  it('keeps persisted Side-mode endpoints while using a compact directional cubic', () => {
     useStore.setState({
       documentSession: { family: 'flowchart', layout: { adapterMetadata: { flowchart: { nodeConnections: { mode: 'side', autoReassign: false } } } } },
     } as never)
     render(<FlowEdge {...baseProps} data={{ style: 'arrow', routeMode: 'curved', sourceSide: 'right', targetSide: 'left' }} />)
 
-    expect(getBezierPath).toHaveBeenCalledWith(expect.objectContaining({
-      sourcePosition: Position.Right,
-      targetPosition: Position.Left,
-    }))
+    expectCompactDirectionalCubic(screen.getByTestId('base-edge').getAttribute('d')!, { sx: 100, sy: 20, tx: 200, ty: 220 })
   })
 
   it('snaps legacy Side-mode edges without saved sides to the four handle midpoints', () => {
@@ -182,14 +239,7 @@ describe('FlowEdge', () => {
     } as never)
     render(<FlowEdge {...baseProps} data={{ style: 'arrow', routeMode: 'curved' }} />)
 
-    expect(getBezierPath).toHaveBeenCalledWith(expect.objectContaining({
-      sourceX: 50,
-      sourceY: 40,
-      targetX: 250,
-      targetY: 200,
-      sourcePosition: Position.Bottom,
-      targetPosition: Position.Top,
-    }))
+    expectCompactDirectionalCubic(screen.getByTestId('base-edge').getAttribute('d')!, { sx: 50, sy: 40, tx: 250, ty: 200 })
   })
 
   it('starts source endpoint reassignment from a pointer drag', () => {
@@ -245,21 +295,20 @@ describe('FlowEdge', () => {
     expect(screen.getByRole('button', { name: 'Drag target endpoint' })).toBeTruthy()
   })
 
-  it('keeps a clear normal curved Bézier instead of replacing it with a straight segment', () => {
+  it('keeps a normal curved route as a cubic instead of replacing it with a straight segment', () => {
     render(<FlowEdge {...baseProps} data={{ style: 'arrow', routeMode: 'curved' }} />)
 
-    expect(screen.getByTestId('base-edge').getAttribute('d')).toBe('M0,0 C25,0 75,100 100,100')
+    expect(screen.getByTestId('base-edge').getAttribute('d')).toContain(' C ')
   })
 
-  it('smart-routes a curved edge when its Bézier geometry, but not its chord, intersects a node', () => {
-    vi.mocked(getBezierPath).mockReturnValue(['M0 0 C 0 200 100 200 100 0', 50, 100])
+  it('smart-routes a curved edge when its compact directional geometry intersects a node', () => {
     useStore.setState({
-      nodes: [{ id: 'blocking', position: { x: 40, y: 130 }, data: { label: 'Blocking', shape: 'rectangle' }, measured: { width: 20, height: 10 } }],
+      nodes: [{ id: 'blocking', position: { x: 140, y: 110 }, data: { label: 'Blocking', shape: 'rectangle' }, measured: { width: 20, height: 20 } }],
     } as never)
 
     render(<FlowEdge {...baseProps} data={{ style: 'arrow', routeMode: 'curved' }} />)
 
-    expect(screen.getByTestId('base-edge').getAttribute('d')).not.toBe('M0 0 C 0 200 100 200 100 0')
+    expect(screen.getByTestId('base-edge').getAttribute('d')).not.toMatch(/^M 70 40 C /)
   })
 
   it('smart-routes an orthogonal edge when its smooth-step geometry, but not its chord, intersects a node', () => {
@@ -387,14 +436,14 @@ describe('FlowEdge', () => {
   })
 
   it('double-click on label area activates editing mode (input appears)', () => {
-    render(<FlowEdge {...baseProps} data={{ style: 'arrow', label: 'old' }} />)
+    render(<FlowEdge {...baseProps} selected data={{ style: 'arrow', label: 'old' }} />)
     const labelArea = screen.getByText('old').parentElement!
     fireEvent.doubleClick(labelArea)
     expect(screen.getByRole('textbox')).toBeTruthy()
   })
 
   it('double-click on the visible edge line activates editing mode', () => {
-    render(<FlowEdge {...baseProps} data={{ style: 'arrow', label: 'old' }} />)
+    render(<FlowEdge {...baseProps} selected data={{ style: 'arrow', label: 'old' }} />)
     fireEvent.doubleClick(screen.getByTestId('base-edge'))
     expect(screen.getByRole('textbox')).toBeTruthy()
   })
@@ -402,7 +451,7 @@ describe('FlowEdge', () => {
   it('Enter in input calls updateEdgeLabel and closes editing', () => {
     const mockUpdateEdgeLabel = vi.fn()
     useStore.setState({ updateEdgeLabel: mockUpdateEdgeLabel } as never)
-    render(<FlowEdge {...baseProps} data={{ style: 'arrow', label: 'old' }} />)
+    render(<FlowEdge {...baseProps} selected data={{ style: 'arrow', label: 'old' }} />)
     fireEvent.doubleClick(screen.getByText('old').parentElement!)
     const input = screen.getByRole('textbox')
     fireEvent.change(input, { target: { value: 'new' } })
@@ -413,7 +462,7 @@ describe('FlowEdge', () => {
   it('Escape in input cancels without calling updateEdgeLabel', () => {
     const mockUpdateEdgeLabel = vi.fn()
     useStore.setState({ updateEdgeLabel: mockUpdateEdgeLabel } as never)
-    render(<FlowEdge {...baseProps} data={{ style: 'arrow', label: 'old' }} />)
+    render(<FlowEdge {...baseProps} selected data={{ style: 'arrow', label: 'old' }} />)
     fireEvent.doubleClick(screen.getByText('old').parentElement!)
     fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Escape' })
     expect(mockUpdateEdgeLabel).not.toHaveBeenCalled()
@@ -423,7 +472,7 @@ describe('FlowEdge', () => {
   it('onBlur on input calls updateEdgeLabel', () => {
     const mockUpdateEdgeLabel = vi.fn()
     useStore.setState({ updateEdgeLabel: mockUpdateEdgeLabel } as never)
-    render(<FlowEdge {...baseProps} data={{ style: 'arrow', label: 'old' }} />)
+    render(<FlowEdge {...baseProps} selected data={{ style: 'arrow', label: 'old' }} />)
     fireEvent.doubleClick(screen.getByText('old').parentElement!)
     const input = screen.getByRole('textbox')
     fireEvent.change(input, { target: { value: 'blurred' } })

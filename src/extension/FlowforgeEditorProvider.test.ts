@@ -698,6 +698,53 @@ describe('FlowforgeEditorProvider', () => {
       }))
     })
 
+    it('does not report its pending write as external when the file watcher fires first', async () => {
+      let fileChangeListener: ((uri: vscode.Uri) => void) | undefined
+      let receive: ((message: WebviewToHostMessage) => void) | undefined
+      const savedContent = 'flowchart TD\n  B[Saved by Flowforge]'
+      const workspaceWithFileWatcher = vscode.workspace as unknown as {
+        createFileSystemWatcher: ReturnType<typeof vi.fn>
+      }
+      workspaceWithFileWatcher.createFileSystemWatcher = vi.fn(() => ({
+        onDidChange: vi.fn((listener: (uri: vscode.Uri) => void) => {
+          fileChangeListener = listener
+          return { dispose: vi.fn() }
+        }),
+        onDidCreate: vi.fn(() => ({ dispose: vi.fn() })),
+        dispose: vi.fn(),
+      }))
+      let resolveEdit!: (value: boolean) => void
+      vi.mocked(vscode.workspace.applyEdit).mockReturnValue(new Promise(resolve => { resolveEdit = resolve }) as never)
+      vi.mocked(vscode.workspace.fs.readFile).mockResolvedValue(new TextEncoder().encode(savedContent))
+      const document = {
+        uri: vscode.Uri.file('/test/watcher-race.mmd'),
+        getText: vi.fn(() => 'flowchart TD\n  A[Before save]'),
+        lineCount: 2,
+        version: 1,
+        save: vi.fn().mockResolvedValue(true),
+      } as unknown as vscode.TextDocument
+      const panel = {
+        webview: {
+          options: {}, html: '', postMessage: postMessageSpy,
+          onDidReceiveMessage: vi.fn((listener: (message: WebviewToHostMessage) => void) => {
+            receive = listener
+            return { dispose: vi.fn() }
+          }),
+        },
+        onDidDispose: vi.fn(() => ({ dispose: vi.fn() })),
+      } as unknown as vscode.WebviewPanel
+      new FlowforgeEditorProvider(fakeContext).resolveCustomTextEditor(
+        document, panel, { isCancellationRequested: false } as vscode.CancellationToken,
+      )
+
+      receive!({ type: 'SAVE', payload: { content: savedContent } })
+      fileChangeListener!(document.uri)
+      await new Promise(resolve => setTimeout(resolve, 0))
+
+      expect(postMessageSpy).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'EXTERNAL_FILE_CHANGE' }))
+      resolveEdit(true)
+    })
+
     it('suppresses duplicate document events correlated to the same own save', () => {
       capturedWebviewMessageHandler!({
         type: 'SAVE',

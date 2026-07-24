@@ -371,7 +371,7 @@
         "path": "scripts/multi-diagram/generate-stress.mjs"
       },
       "mermaidVersion": "11.14.0",
-      "sha256": "b88c4223bab54eb04d6eca4c85d0daf145d3fc0e9b92fca13a22176e9dff8ac9",
+      "sha256": "fec9ce1ec6b1a0dc29cdbd52ed8bf6692703b7ad8003e76d66be59723c102b58",
       "expected": {
         "validation": "pass",
         "render": "pass"
@@ -398,7 +398,7 @@
         "path": "scripts/multi-diagram/generate-stress.mjs"
       },
       "mermaidVersion": "11.14.0",
-      "sha256": "7dbd3e9e83118a4d7ac2d54e30a6118539a611866899081001067375855a5e8e",
+      "sha256": "596308687d3c5c677fe1eeaa81448dc58b81869a416282a30f3890c1c9f43c23",
       "expected": {
         "validation": "pass",
         "render": "pass"
@@ -425,7 +425,7 @@
         "path": "scripts/multi-diagram/generate-stress.mjs"
       },
       "mermaidVersion": "11.14.0",
-      "sha256": "548a027ffe586e94affcf59a1d873204d6bd781cab02487b13fad4c1d0a775fd",
+      "sha256": "d39792947e70f567ef3cc34a4d9e1f6024a7eede5602217b31ba3373917ba3d6",
       "expected": {
         "validation": "pass",
         "render": "pass"
@@ -452,7 +452,7 @@
         "path": "scripts/multi-diagram/generate-stress.mjs"
       },
       "mermaidVersion": "11.14.0",
-      "sha256": "ad8c6330b42d7f2090ed3626e754f7d871536bd79252ab62344af233aeaf5679",
+      "sha256": "6a35227fc0dae6c8afd77ae1e132ad78fc131e9b332648f781757735f58869f9",
       "expected": {
         "validation": "pass",
         "render": "pass"
@@ -479,7 +479,7 @@
         "path": "scripts/multi-diagram/generate-stress.mjs"
       },
       "mermaidVersion": "11.14.0",
-      "sha256": "19e1441c7b7779823ab5b78f4b96e16b6186c442c815abce1dea3b95af6ffde3",
+      "sha256": "206c1f2cde6e87c4aac9a95b2e5a342bf82c21be56230144f9c6711988c788e0",
       "expected": {
         "validation": "unsupported",
         "render": "unsupported"
@@ -506,7 +506,7 @@
         "path": "scripts/multi-diagram/generate-stress.mjs"
       },
       "mermaidVersion": "11.14.0",
-      "sha256": "ecf5a7ab4be3dcb1cc8d47e9337b75c6668e2216f9b99e0896fe49b8e14748dd",
+      "sha256": "3c4c66bd3050f387198246cb9e868761758e443f2e7c9d193106c5bfce101f3b",
       "expected": {
         "validation": "unsupported",
         "render": "unsupported"
@@ -533,7 +533,7 @@
         "path": "scripts/multi-diagram/generate-stress.mjs"
       },
       "mermaidVersion": "11.14.0",
-      "sha256": "af39aa9cdaffd27627bb48998553c04b57908818cd85a62af10b8f1f7d3e6f9a",
+      "sha256": "6a3c7c71a65d1367ab051e43fb9c9eee22f44354d993b7cd6fcc2b87d70cd568",
       "expected": {
         "validation": "pass",
         "render": "pass"
@@ -560,7 +560,7 @@
         "path": "scripts/multi-diagram/generate-stress.mjs"
       },
       "mermaidVersion": "11.14.0",
-      "sha256": "3f87c90c5b0dc8455e21580b8fda231ef484dcd3c3ee484a225f185934730efc",
+      "sha256": "1ee116cd855fe61ed568441143ab6b28400977f02866755db0874efa38e48590",
       "expected": {
         "validation": "pass",
         "render": "pass"

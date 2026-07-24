@@ -112,9 +112,9 @@ describe('parseMermaidFlowchart', () => {
     expect(result.edges[0].data?.label).toBeUndefined()
   })
 
-  it('empty string returns { error }', () => {
-    const result = parseMermaidFlowchart('')
-    expect('error' in result).toBe(true)
+  it('empty string produces an editable blank flowchart', () => {
+    const result = asSuccess(parseMermaidFlowchart(''))
+    expect(result).toEqual({ nodes: [], edges: [], passthroughLines: [] })
   })
 
   it('non-flowchart text returns { error }', () => {

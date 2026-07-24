@@ -377,7 +377,10 @@ function parseSubgraphChildren(
 
 export function parseMermaidFlowchart(input: string): ParseResult {
   try {
-    if (!input.trim()) return { error: 'Empty input' }
+    // A newly created Mermaid document has no declaration yet, but it is still
+    // a valid Flowforge canvas. Keep it empty until the first edit so Code view
+    // remains byte-for-byte faithful to the new document.
+    if (!input.trim()) return { nodes: [], edges: [], passthroughLines: [] }
 
     const rawLines = input.split(/\r\n|\n|\r/)
     if (!rawLines.some(l => /^(?:flowchart|graph)\b/.test(l.trim()))) {

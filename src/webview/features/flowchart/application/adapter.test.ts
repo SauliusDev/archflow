@@ -41,6 +41,21 @@ function apply(operation: ReturnType<typeof issueFlowchartOperation>, revision =
 }
 
 describe('flowchartCompatibilityAdapter', () => {
+  it('keeps a new empty document on Canvas and creates a Mermaid declaration on its first edit', () => {
+    const parsed = flowchartCompatibilityAdapter.parse('', 1)
+
+    expect(initializeAdapterProjection('flowchart', '', 1).diagnostics)
+      .not.toContainEqual(expect.objectContaining({ code: 'code-preview-fallback' }))
+
+    const result = applySourceOperations(
+      parsed.concrete,
+      issueFlowchartOperation(parsed, { kind: 'add-node', id: 'Start', label: 'Start' }),
+      (candidate, revision) => ({ valid: true, concrete: flowchartCompatibilityAdapter.parse(candidate, revision).concrete }),
+    )
+
+    expect(result).toMatchObject({ success: true, document: { source: 'flowchart TD\n  Start[Start]' } })
+  })
+
   it('accepts all 110 required Mermaid flowchart examples without losing canonical source', () => {
     expect(Object.keys(flowchartCorpus)).toHaveLength(110)
     for (const [name, example] of Object.entries(flowchartCorpus)) {

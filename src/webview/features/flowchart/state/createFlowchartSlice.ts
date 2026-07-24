@@ -283,10 +283,7 @@ export const createFlowchartSlice: StateCreator<
       ? allocateCompactIdentifier("node", occupiedFlowchartElementIds(nodes, documentSession))
       : node.id;
     const visualNode = visualId === node.id ? node : { ...node, id: visualId };
-    if (
-      documentSession &&
-      documentSession.source.trim()
-    ) {
+    if (documentSession) {
       try {
         const semanticId = /^[A-Za-z_][A-Za-z0-9_-]*$/.test(visualNode.id)
           ? visualNode.id

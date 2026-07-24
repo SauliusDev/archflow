@@ -404,7 +404,10 @@ function buildModel(source: string): FlowchartAdapterModel {
     ?? topLevelConstructs.find(construct => construct.kind === 'subgraph')
   const indent = anchor?.text.match(/^\s*/)?.[0] || '  '
   const newline = source.includes('\r\n') ? '\r\n' : '\n'
-  const insertionPrefix = `${newline}${indent}`
+  // The first Canvas edit materializes a valid Mermaid declaration. This lets
+  // a new, empty file render as an available blank canvas without injecting
+  // source text before the user makes an edit.
+  const insertionPrefix = source.trim() ? `${newline}${indent}` : 'flowchart TD\n  '
   return { ...parsed, nodes, nodeLabels, nodeLines, nodeShapeNames, nodeColorStyles, nodeColorStyleLines, nodeColorUnavailableIds, edgeLines, subgraphBlocks, ambiguousNodeIds, insertionPoint, insertionPrefix, sourceMap }
 }
 

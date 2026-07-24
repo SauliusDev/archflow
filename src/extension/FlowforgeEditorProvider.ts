@@ -230,12 +230,18 @@ export class FlowforgeEditorProvider implements vscode.CustomTextEditorProvider 
       if (content === state.content) return
       state.content = content
       state.revision += 1
+      const origin = this.saveCoordinator.observeDocumentChange({
+        documentUri: uri.toString(),
+        content,
+        revision: state.revision,
+      })
       for (const [session, post] of state.panels) {
         if (session.disposed) continue
         session.observeHostRevision(state.revision)
+        if (origin?.sessionId === session.sessionId) continue
         post({
           type: 'EXTERNAL_FILE_CHANGE', sessionId: session.sessionId, baseRevision: state.revision, eventId: crypto.randomUUID(),
-          payload: { content, hostRevision: state.revision, workingRevision: session.workingRevision },
+          payload: { content, hostRevision: state.revision, workingRevision: session.workingRevision, ...(origin ? { originTransactionId: origin.transactionId } : {}) },
         })
       }
     } catch (error) {

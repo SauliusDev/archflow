@@ -98,8 +98,11 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
             </span>
             </label>
             <label className="settings-dialog__preference">
-            <span>
-              <strong>Smart routing</strong>
+              <span>
+              <span className="settings-dialog__preference-heading">
+                <strong>Smart routing</strong>
+                <span className="settings-dialog__experimental-badge">Experimental</span>
+              </span>
               <small id="settings-dialog-smart-routing-description">Automatically avoid nodes and existing edges in flowcharts.</small>
             </span>
             <span className="settings-dialog__switch">
@@ -157,7 +160,10 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
                       onChange={() => onNewEdgeRouteModeChange(mode)}
                     />
                     <span className="settings-dialog__route-preview" aria-hidden="true"><i /></span>
-                    <span className="settings-dialog__route-label">{label}</span>
+                    <span className="settings-dialog__route-label">
+                      <span>{label}</span>
+                      {mode !== 'straight' && <span className="settings-dialog__experimental-badge">Experimental</span>}
+                    </span>
                   </label>
                 )
               })}
@@ -201,9 +207,11 @@ export default function SettingsDialog({ open, autoSave, onAutoSaveChange, smart
               target="_blank"
               rel="noreferrer"
             >
-              <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-                <path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.49c-2.23.49-2.7-1.08-2.7-1.08-.36-.93-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.65-.89-3.65-3.96 0-.88.31-1.59.83-2.15-.08-.2-.36-1.02.08-2.12 0 0 .68-.22 2.2.82A7.65 7.65 0 0 1 8 4.8c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.52.56.83 1.27.83 2.15 0 3.08-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.14.46.55.38A8 8 0 0 0 8 0Z" />
-              </svg>
+              <span className="settings-dialog__github-icon" aria-hidden="true">
+                <svg viewBox="0 0 16 16" focusable="false">
+                  <path d="M8 0a8 8 0 0 0-2.53 15.59c.4.07.55-.17.55-.38v-1.49c-2.23.49-2.7-1.08-2.7-1.08-.36-.93-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.81.06 1.23.83 1.23.83.72 1.23 1.88.87 2.34.67.07-.52.28-.87.51-1.07-1.78-.2-3.65-.89-3.65-3.96 0-.88.31-1.59.83-2.15-.08-.2-.36-1.02.08-2.12 0 0 .68-.22 2.2.82A7.65 7.65 0 0 1 8 4.8c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.52.56.83 1.27.83 2.15 0 3.08-1.87 3.75-3.66 3.95.29.25.54.73.54 1.48v2.2c0 .21.14.46.55.38A8 8 0 0 0 8 0Z" />
+                </svg>
+              </span>
               <span>View FlowForge on GitHub</span>
             </a>
           </section>

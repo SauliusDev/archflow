@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '@/state/createStore'
 import { GRID_SNAP } from '@/state/types'
-import type { NodeShape } from '@/features/flowchart'
-import { findEdgeInsertionCandidate } from '@/features/flowchart/application/edgeInsertion'
+import { findEdgeInsertionCandidate, type NodeShape } from '@/features/flowchart'
 
 const validPaletteShapes = new Set<string>(['rectangle', 'rounded', 'pill', 'diamond', 'circle', 'hexagon', 'cylinder', 'subgraph'])
 

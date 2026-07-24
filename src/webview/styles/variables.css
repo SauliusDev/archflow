@@ -39,6 +39,8 @@
   /* ── FOUNDATION: Status Colors ────────────────────────────────────────── */
   --mv-green: #72c892;            /* Success states                            */
   --mv-yellow: #e5ba7d;           /* Warning states                            */
+  --mv-yellow-dim: rgba(229, 186, 125, 0.14); /* Experimental feature background      */
+  --mv-yellow-mid: rgba(229, 186, 125, 0.38); /* Experimental feature border          */
   --mv-red: #f48771;              /* Error states, delete button danger hover  */
   --mv-danger-bg: rgba(244, 135, 113, 0.15); /* Destructive control hover        */
 

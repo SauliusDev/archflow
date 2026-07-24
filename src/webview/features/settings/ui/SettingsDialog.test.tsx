@@ -37,6 +37,14 @@ describe('SettingsDialog', () => {
     expect(screen.getByRole('group', { name: 'General settings' })).not.toBeNull()
   })
 
+  it('marks Smart routing and its experimental route modes', () => {
+    renderDialog()
+    expect(screen.getAllByText('Experimental')).toHaveLength(3)
+    expect(screen.getByRole('checkbox', { name: 'Smart routing' }).closest('label')?.textContent).toContain('Experimental')
+    expect(screen.getByRole('radio', { name: 'Orthogonal new-edge route' }).closest('label')?.textContent).toContain('Experimental')
+    expect(screen.getByRole('radio', { name: 'Curved new-edge route' }).closest('label')?.textContent).toContain('Experimental')
+  })
+
   it('links to the FlowForge GitHub project from the About section', () => {
     renderDialog()
 

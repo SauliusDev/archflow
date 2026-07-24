@@ -2,7 +2,7 @@
   "name": "flowforge",
   "displayName": "FlowForge",
   "publisher": "sauliusd3v",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Mermaid diagram visual editor for VS Code",
   "repository": {
     "type": "git",
@@ -93,6 +93,7 @@
   "scripts": {
     "dev": "concurrently -n ext,web \"node esbuild.mjs --watch\" \"vite\"",
     "build": "node esbuild.mjs && vite build",
+    "release:local": "pnpm run build && mkdir -p .flowforge && npx --yes @vscode/vsce package --no-dependencies --out .flowforge/flowforge-local.vsix && code --install-extension .flowforge/flowforge-local.vsix --force",
     "lint": "eslint src",
     "test:webview": "NODE_ENV=test vitest run --config vitest.config.mts",
     "test:unit": "vitest run --config vitest.config.host.ts",

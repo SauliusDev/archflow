@@ -117,6 +117,12 @@
   gap: 4px;
 }
 
+.settings-dialog__preference-heading {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .settings-dialog__preference strong {
   color: var(--mv-text-bright);
   font-size: 13px;
@@ -343,8 +349,27 @@
 }
 
 .settings-dialog__route-label {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
   color: var(--mv-text-secondary);
   font-weight: 600;
+}
+
+.settings-dialog__experimental-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 2px 5px;
+  color: var(--mv-yellow);
+  background: var(--mv-yellow-dim);
+  border: 1px solid var(--mv-yellow-mid);
+  border-radius: var(--mv-r-pill);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+  text-transform: uppercase;
 }
 
 .settings-dialog__about {
@@ -395,9 +420,21 @@
 }
 
 .settings-dialog__github-link svg {
-  width: 16px;
-  height: 16px;
+  display: block;
+  width: 14px;
+  height: 14px;
   fill: currentColor;
+}
+
+.settings-dialog__github-icon {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  place-items: center;
+  color: var(--mv-text-bright);
+  background: var(--mv-bg-overlay);
+  border-radius: var(--mv-r-pill);
 }
 
 .settings-dialog__route-option--selected .settings-dialog__route-label {

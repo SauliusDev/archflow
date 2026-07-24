@@ -173,8 +173,33 @@ describe('FlowNode', () => {
     })
 
     it('renders ConnectArrows when selected is true', () => {
+      useStore.setState(state => ({
+        nodes: state.nodes.map(node => node.id === 'node1' ? { ...node, selected: true } : node),
+      }))
       const { container } = render(<FlowNode {...makeNodeProps('rectangle', 'Test', true)} />)
       expect(container.querySelector('.connect-arrows')).not.toBeNull()
+    })
+
+    it('hides ConnectArrows when multiple elements are selected', () => {
+      useStore.setState(state => ({
+        nodes: [
+          ...state.nodes.map(node => node.id === 'node1' ? { ...node, selected: true } : node),
+          { id: 'node2', position: { x: 120, y: 0 }, data: { label: 'Second', shape: 'rectangle' }, type: 'default', selected: true },
+        ],
+      }))
+      const { container } = render(<FlowNode {...makeNodeProps('rectangle', 'Test', true)} />)
+
+      expect(container.querySelector('.connect-arrows')).toBeNull()
+    })
+
+    it('hides ConnectArrows when a selected edge is part of the selection', () => {
+      useStore.setState(state => ({
+        nodes: state.nodes.map(node => node.id === 'node1' ? { ...node, selected: true } : node),
+        edges: [{ id: 'edge1', source: 'node1', target: 'node2', selected: true }],
+      }))
+      const { container } = render(<FlowNode {...makeNodeProps('rectangle', 'Test', true)} />)
+
+      expect(container.querySelector('.connect-arrows')).toBeNull()
     })
 
     it('does not render ConnectArrows when selected is false', () => {
@@ -234,6 +259,14 @@ describe('FlowNode', () => {
       render(<FlowNode {...makeNodeProps('rectangle', 'Test', false)} />)
 
       expect(screen.getAllByLabelText(/Assign edge endpoint to .+ side/)).toHaveLength(4)
+    })
+
+    it('hides side targets when a selected edge is part of the selection', () => {
+      enableSideConnections()
+      useStore.setState({ edges: [{ id: 'edge1', source: 'node1', target: 'node2', selected: true }] } as never)
+      render(<FlowNode {...makeNodeProps('rectangle', 'Test', true)} />)
+
+      expect(screen.queryByLabelText('Assign edge endpoint to top side')).toBeNull()
     })
 
     it('exposes each side target as a keyboard-focusable button', () => {

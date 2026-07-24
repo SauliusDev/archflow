@@ -12,6 +12,7 @@ export { parseMermaidFlowchart } from "./application/parser";
 export type { ParseSuccess } from "./application/parser";
 export { serialize } from "./application/serializer";
 export { applyDagreLayout } from "./application/layout";
+export { findEdgeInsertionCandidate } from "./application/edgeInsertion";
 export {
   constrainNodePositionToGroupBody,
   constrainTopLevelNodePositionOutsideGroup,

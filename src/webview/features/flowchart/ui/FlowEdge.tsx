@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef } from 'react'
-import { BaseEdge, EdgeLabelRenderer, getBezierPath, getSmoothStepPath, getStraightPath, useInternalNode, useReactFlow } from '@xyflow/react'
+import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, getStraightPath, useInternalNode, useReactFlow } from '@xyflow/react'
 import type { Edge, EdgeProps, Node } from '@xyflow/react'
+import { useShallow } from 'zustand/react/shallow'
 import type { FlowEdgeData, EdgeStyle, FlowNodeData } from '@/features/flowchart'
 import { useStore } from '@/state/createStore'
 import { getEdgeParams } from '@/lib/floatingEdge'
@@ -101,18 +102,28 @@ function simplifyBaseline(points: Array<{ x: number; y: number }>): Array<{ x: n
   return points.filter((point, index) => index === 0 || point.x !== points[index - 1].x || point.y !== points[index - 1].y)
 }
 
-function curvedBaseline(start: { x: number; y: number }, end: { x: number; y: number }, sourceSide: Side, targetSide: Side): Array<{ x: number; y: number }> {
-  const vectors: Record<Side, { x: number; y: number }> = { left: { x: -1, y: 0 }, right: { x: 1, y: 0 }, top: { x: 0, y: -1 }, bottom: { x: 0, y: 1 } }
-  const offset = Math.max(25, Math.min(100, Math.hypot(end.x - start.x, end.y - start.y) / 2))
-  const controlA = { x: start.x + vectors[sourceSide].x * offset, y: start.y + vectors[sourceSide].y * offset }
-  const controlB = { x: end.x + vectors[targetSide].x * offset, y: end.y + vectors[targetSide].y * offset }
-  return Array.from({ length: 9 }, (_, index) => {
-    const t = index / 8
-    return {
-      x: (1 - t) ** 3 * start.x + 3 * (1 - t) ** 2 * t * controlA.x + 3 * (1 - t) * t ** 2 * controlB.x + t ** 3 * end.x,
-      y: (1 - t) ** 3 * start.y + 3 * (1 - t) ** 2 * t * controlA.y + 3 * (1 - t) * t ** 2 * controlB.y + t ** 3 * end.y,
-    }
-  })
+function compactCurvedPath(start: { x: number; y: number }, end: { x: number; y: number }, edgeId: string): { path: string; label: { x: number; y: number } } {
+  const dx = end.x - start.x
+  const dy = end.y - start.y
+  const distance = Math.hypot(dx, dy)
+  if (!Number.isFinite(distance) || distance === 0) {
+    return { path: `M ${start.x} ${start.y} L ${end.x} ${end.y}`, label: { x: start.x, y: start.y } }
+  }
+
+  // Keep the actual connection vector dominant at both endpoints, with a
+  // small stable bow. Attachment sides decide where it meets a node, not a
+  // forced 90° approach.
+  const controlDistance = Math.max(20, Math.min(52, distance * 0.2))
+  const unit = { x: dx / distance, y: dy / distance }
+  const direction = Array.from(edgeId).reduce((hash, character) => (hash * 31 + character.charCodeAt(0)) >>> 0, 0) % 2 === 0 ? 1 : -1
+  const bend = Math.max(6, Math.min(14, distance * 0.05))
+  const normal = { x: -unit.y * direction, y: unit.x * direction }
+  const controlA = { x: start.x + unit.x * controlDistance + normal.x * bend, y: start.y + unit.y * controlDistance + normal.y * bend }
+  const controlB = { x: end.x - unit.x * controlDistance + normal.x * bend, y: end.y - unit.y * controlDistance + normal.y * bend }
+  return {
+    path: `M ${start.x} ${start.y} C ${controlA.x} ${controlA.y} ${controlB.x} ${controlB.y} ${end.x} ${end.y}`,
+    label: { x: (start.x + end.x) / 2, y: (start.y + end.y) / 2 },
+  }
 }
 
 function reciprocalCurve(start: { x: number; y: number }, end: { x: number; y: number }, direction: 1 | -1): { path: string; label: { x: number; y: number } } {
@@ -162,7 +173,7 @@ function stableEdgeBaseline(edge: Edge<FlowEdgeData>, nodes: readonly Node<FlowN
   })
   if (route.detoured) return { points: route.points }
   if (mode === 'orthogonal') return { points: simplifyBaseline([sourceAttachment.point, { x: targetAttachment.point.x, y: sourceAttachment.point.y }, targetAttachment.point]) }
-  if (mode === 'curved') return { points: curvedBaseline(sourceAttachment.point, targetAttachment.point, sourceAttachment.side, targetAttachment.side) }
+  if (mode === 'curved') return { points: sampleRoutingPath(compactCurvedPath(sourceAttachment.point, targetAttachment.point, edge.id).path) }
   return { points: [sourceAttachment.point, targetAttachment.point] }
 }
 
@@ -178,8 +189,11 @@ export default function FlowEdge({
   const removeEdgeWaypoint = useStore(s => s.removeEdgeWaypoint)
   const setPendingConnect = useStore(s => s.setPendingConnect)
   const isLocked = useStore(s => s.isLocked)
-  const nodes = useStore(s => s.nodes)
-  const edges = useStore(s => s.edges)
+  const { nodes, edges } = useStore(useShallow(s => ({ nodes: s.nodes, edges: s.edges })))
+  const isOnlySelectedEdge = useStore(s => {
+    const selectedCount = s.nodes.filter(node => node.selected).length + s.edges.filter(edge => edge.selected).length
+    return selected && selectedCount === 1 && s.edges.some(edge => edge.id === id && edge.selected)
+  })
   const sideMode = useStore(s => {
     const session = s.documentSession
     return session?.family === 'flowchart' && flowchartNodeConnections(session.layout).mode === 'side'
@@ -242,7 +256,10 @@ export default function FlowEdge({
   } else if (routeMode === 'orthogonal') {
     [edgePath, labelX, labelY] = getSmoothStepPath({ sourceX: sx, sourceY: sy, targetX: tx, targetY: ty, sourcePosition: sourcePos, targetPosition: targetPos })
   } else if (routeMode === 'curved') {
-    [edgePath, labelX, labelY] = getBezierPath({ sourceX: sx, sourceY: sy, targetX: tx, targetY: ty, sourcePosition: sourcePos, targetPosition: targetPos })
+    const curve = compactCurvedPath({ x: sx, y: sy }, { x: tx, y: ty }, String(id))
+    edgePath = curve.path
+    labelX = curve.label.x
+    labelY = curve.label.y
   } else {
     [edgePath, labelX, labelY] = getStraightPath({ sourceX: sx, sourceY: sy, targetX: tx, targetY: ty })
   }
@@ -284,11 +301,11 @@ export default function FlowEdge({
 
   const handleLabelDoubleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    if (isLocked) return
+    if (isLocked || !isOnlySelectedEdge) return
     isEscapingRef.current = false
     setEditValue(data?.label ?? '')
     setEditing(true)
-  }, [data?.label, isLocked])
+  }, [data?.label, isLocked, isOnlySelectedEdge])
 
   if (!sourceNode || !targetNode) return null
 
@@ -330,7 +347,7 @@ export default function FlowEdge({
         onDoubleClick={handleLabelDoubleClick}
       />
 
-      {selected && !isLocked && ([
+      {isOnlySelectedEdge && !isLocked && ([
         ['source', source, sx, sy, supportsSideAssignment(sourceNode)],
         ['target', target, tx, ty, supportsSideAssignment(targetNode)],
       ] as const).filter(([, , , , supported]) => supported).map(([endpoint, _nodeId, x, y]) => (
@@ -365,7 +382,7 @@ export default function FlowEdge({
           }}
           onDoubleClick={handleLabelDoubleClick}
         >
-          {editing ? (
+          {editing && isOnlySelectedEdge ? (
             <input
               className="flow-edge__label-input"
               value={editValue}
@@ -382,19 +399,19 @@ export default function FlowEdge({
               className={
                 data?.label
                   ? 'flow-edge__label'
-                  : selected
+                  : isOnlySelectedEdge
                   ? 'flow-edge__label-affordance'
                   : undefined
               }
             >
-              {data?.label ?? (selected ? '✎' : '')}
+              {data?.label ?? (isOnlySelectedEdge ? '✎' : '')}
             </span>
           )}
         </div>
       </EdgeLabelRenderer>
 
       {/* Style toolbar — only when selected, positioned above the label */}
-      {selected && (
+      {isOnlySelectedEdge && (
         <EdgeLabelRenderer>
           <div
             className="flow-edge__toolbar nodrag nopan"
@@ -449,7 +466,7 @@ export default function FlowEdge({
           </div>
         </EdgeLabelRenderer>
       )}
-      {selected && routeMode === 'orthogonal' && waypoints.map((point, index) => (
+      {isOnlySelectedEdge && routeMode === 'orthogonal' && waypoints.map((point, index) => (
         <EdgeLabelRenderer key={`${id}-waypoint-${index}`}>
           <button
             className="flow-edge__waypoint nodrag nopan"

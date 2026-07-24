@@ -2,8 +2,7 @@ import { useRef, useState } from 'react'
 import type { Node, XYPosition } from '@xyflow/react'
 import { useStore } from '@/state/createStore'
 import type { FlowNodeData } from '@/features/flowchart'
-import { constrainNodePositionToGroupBody, constrainTopLevelNodePositionOutsideGroup, findDropTargetSubgraph, groupBodyContainsNode, isNodeOutsideParent, toAbsolutePosition, toRelativePosition } from '@/features/flowchart'
-import { findEdgeInsertionCandidate } from '@/features/flowchart/application/edgeInsertion'
+import { constrainNodePositionToGroupBody, constrainTopLevelNodePositionOutsideGroup, findDropTargetSubgraph, findEdgeInsertionCandidate, groupBodyContainsNode, isNodeOutsideParent, toAbsolutePosition, toRelativePosition } from '@/features/flowchart'
 
 export function useCanvasDrag() {
   const [dropTargetId, setDropTargetId] = useState<string | null>(null)

@@ -35,6 +35,9 @@ export default function FlowNode({
   const resizeNode = useStore(s => s.resizeNode)
   const updateNodeLabel = useStore(s => s.updateNodeLabel)
   const selectedCount = useStore(s => s.nodes.filter(n => n.selected).length)
+  const selectedElementCount = useStore(s => (
+    s.nodes.filter(node => node.selected).length + s.edges.filter(edge => edge.selected).length
+  ))
   const isCanvasLocked = useStore(s => s.isLocked)
   const isSideConnectionMode = useSideConnectionMode()
   const pendingConnect = useStore(s => s.pendingConnect)
@@ -100,7 +103,7 @@ export default function FlowNode({
   }
 
   const showSideAttachmentTargets = !isCanvasLocked && isSideConnectionMode && (
-    (Boolean(selected) && selectedCount === 1) ||
+    (Boolean(selected) && selectedElementCount === 1) ||
     (pendingConnect !== null && (pendingConnect.kind === 'reassign' ? pendingConnect.fixedNodeId : pendingConnect.sourceId) !== id && pendingConnectTargetId === id)
   )
   const isConnectionTarget = !isCanvasLocked && pendingConnect !== null
@@ -130,7 +133,7 @@ export default function FlowNode({
         positionAbsoluteY={positionAbsoluteY}
         onEditLabel={handleStartEdit}
       />
-      <ConnectArrows isVisible={Boolean(selected) && !isCanvasLocked} nodeId={id} />
+      <ConnectArrows isVisible={Boolean(selected) && selectedElementCount === 1 && !isCanvasLocked} nodeId={id} />
       <ShapeGraphic shape={shape} mermaidShape={data.mermaidShape} />
       {editingLabel !== null && !isCanvasLocked ? (
         <textarea

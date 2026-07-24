@@ -37,6 +37,26 @@ function node(id: string, x: number, y: number) {
 }
 
 describe('executeFlowchartCommand', () => {
+  it('atomically retargets the original labeled edge and adds its second leg', () => {
+    const current = session('flowchart LR\n  A[Alpha]\n  B[Beta]\n  A e1@-.->|request| B\n')
+    const result = executeFlowchartCommand(current, {
+      operations: [
+        { kind: 'add-node', id: 'C', label: 'Cache', shape: 'rectangle' },
+        { kind: 'update-edge', id: 'e1', target: 'C' },
+        { kind: 'add-edge', id: 'e2', source: 'C', target: 'B', style: 'dotted' },
+      ],
+      description: 'Insert C on e1',
+      layout: { ...layout, elements: { 'node:C': { x: 160, y: 0 } }, edges: { 'edge:e1': { routeMode: 'curved' }, 'edge:e2': { routeMode: 'curved' } } },
+    }, dependencies)
+
+    expect(result).toMatchObject({ ok: true })
+    if (!result.ok) return
+    expect(result.value.source).toContain('A e1@-.->|request| C')
+    expect(result.value.source).toContain('C e2@-.-> B')
+    expect(result.value.history.past).toHaveLength(1)
+    expect(result.value.layout.edges).toMatchObject({ 'edge:e1': { routeMode: 'curved' }, 'edge:e2': { routeMode: 'curved' } })
+  })
+
   it('keeps surviving edge routes with their connections when deleting an earlier edge', () => {
     const source = [
       'flowchart TD',

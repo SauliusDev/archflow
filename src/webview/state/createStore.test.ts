@@ -100,6 +100,26 @@ describe("createFlowforgeStore", () => {
     expect(state.documentSession?.history.past).toHaveLength(1);
   });
 
+  it("materializes an empty flowchart when its first node is added", () => {
+    const store = createFlowforgeStore();
+    const projection = flowchartCompatibilityAdapter.parse("", 1);
+    store
+      .getState()
+      .initializeDocumentSession(
+        createDocumentSession("empty-session", 1, projection, layout),
+      );
+
+    store.getState().addNode(node("A"));
+
+    const state = store.getState();
+    expect(state.documentSession?.source).toBe("flowchart TD\n  A[A]");
+    expect(state.codeSource).toBe(state.documentSession?.source);
+    expect(state.nodes).toEqual([
+      expect.objectContaining({ id: "A", selected: true }),
+    ]);
+    expect(state.documentSession?.history.past).toHaveLength(1);
+  });
+
   it("keeps source edits dirty when the inspector visibility is restored", () => {
     const store = createFlowforgeStore();
     const projection = flowchartCompatibilityAdapter.parse(
