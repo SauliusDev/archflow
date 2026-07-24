@@ -19,8 +19,17 @@ describe('findEdgeInsertionCandidate', () => {
     expect(findEdgeInsertionCandidate({ x: 200, y: 30 }, nodes, edges)).toBeNull()
     expect(findEdgeInsertionCandidate({ x: 200, y: 30 }, nodes, [{ ...edges[0], data: { style: 'arrow', ownership: 'represented' } }])).toBeNull()
     expect(findEdgeInsertionCandidate({ x: 200, y: 30 }, nodes, [{ ...edges[0], data: { style: 'arrow', ownership: 'preserved-only' } }])).toBeNull()
-    expect(findEdgeInsertionCandidate({ x: 200, y: 30 }, nodes, [{ ...edges[0], data: { style: 'arrow', routeMode: 'curved' } }])).toBeNull()
-    expect(findEdgeInsertionCandidate({ x: 200, y: 30 }, nodes, [{ ...edges[0], data: { style: 'arrow', routeMode: 'orthogonal', waypoints: [{ x: 200, y: 30 }] } }])).toBeNull()
+  })
+
+  it('finds a curved edge at its rendered curve', () => {
+    const diagonalNodes = [nodes[0], { ...nodes[1], position: { x: 300, y: 200 } }]
+    const edge = { id: 'e1', source: 'A', target: 'B', data: { style: 'arrow' as const, routeMode: 'curved' as const } }
+    expect(findEdgeInsertionCandidate({ x: 200, y: 130 }, diagonalNodes, [edge]))?.toMatchObject({ id: 'e1' })
+  })
+
+  it('finds an orthogonal edge at a manual waypoint segment', () => {
+    const edge = { id: 'e1', source: 'A', target: 'B', data: { style: 'arrow' as const, routeMode: 'orthogonal' as const, waypoints: [{ x: 100, y: 140 }, { x: 300, y: 140 }] } }
+    expect(findEdgeInsertionCandidate({ x: 200, y: 140 }, nodes, [edge]))?.toMatchObject({ id: 'e1' })
   })
 
   it('rejects edges attached to subgraphs and lanes', () => {
