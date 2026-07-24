@@ -19,6 +19,25 @@ describe('useCanvasDrag', () => {
     expect(useStore.getState().syncDirection).toBeNull()
   })
 
+  it('offers and inserts one unconnected node dropped on an eligible edge', () => {
+    const source: Node<FlowNodeData> = { id: 'A', type: 'flowNode', position: { x: 0, y: 0 }, width: 100, height: 60, data: { label: 'A', shape: 'rectangle' } }
+    const target: Node<FlowNodeData> = { id: 'B', type: 'flowNode', position: { x: 300, y: 0 }, width: 100, height: 60, data: { label: 'B', shape: 'rectangle' } }
+    const inserted: Node<FlowNodeData> = { id: 'C', type: 'flowNode', position: { x: 150, y: 0 }, width: 100, height: 60, data: { label: 'C', shape: 'rectangle' } }
+    useStore.setState({ nodes: [source, target, inserted], edges: [{ id: 'e1', source: 'A', target: 'B', data: { style: 'arrow' } }], documentSession: null, isLocked: false, history: { past: [], future: [] } })
+    const { result } = renderHook(() => useCanvasDrag())
+
+    act(() => result.current.handleNodeDragStart({} as React.MouseEvent, inserted, [inserted]))
+    act(() => result.current.handleNodeDrag({} as React.MouseEvent, inserted))
+    expect(result.current.edgeInsertionId).toBe('e1')
+    act(() => result.current.handleNodeDragStop({} as React.MouseEvent, inserted, [inserted]))
+
+    expect(useStore.getState().edges).toEqual([
+      expect.objectContaining({ id: 'e1', source: 'A', target: 'C' }),
+      expect.objectContaining({ source: 'C', target: 'B' }),
+    ])
+    expect(useStore.getState().history.past).toHaveLength(1)
+  })
+
   it('persists the primary dragged group when React Flow provides no selection list', () => {
     const moveNodes = vi.fn()
     const group: Node<FlowNodeData> = {
@@ -107,5 +126,20 @@ describe('useCanvasDrag', () => {
     act(() => result.current.handleNodeDragStop({} as React.MouseEvent, node, [node]))
 
     expect(moveNodes).toHaveBeenCalledWith([{ id: 'node', position: { x: 160, y: 60 } }], {})
+  })
+
+  it('falls back to ordinary movement when insertion is rejected at release', () => {
+    const moveNodes = vi.fn()
+    const insertNodeOnEdge = vi.fn(() => false)
+    const a: Node<FlowNodeData> = { id: 'A', type: 'flowNode', position: { x: 0, y: 0 }, width: 100, height: 60, data: { label: 'A', shape: 'rectangle' } }
+    const b: Node<FlowNodeData> = { id: 'B', type: 'flowNode', position: { x: 300, y: 0 }, width: 100, height: 60, data: { label: 'B', shape: 'rectangle' } }
+    const c: Node<FlowNodeData> = { id: 'C', type: 'flowNode', position: { x: 150, y: 0 }, width: 80, height: 40, data: { label: 'C', shape: 'rectangle' } }
+    useStore.setState({ nodes: [a, b, c], edges: [{ id: 'e1', source: 'A', target: 'B', data: { style: 'arrow' } }], moveNodes, insertNodeOnEdge } as never)
+    const { result } = renderHook(() => useCanvasDrag())
+    act(() => result.current.handleNodeDragStart({} as React.MouseEvent, c, [c]))
+    act(() => result.current.handleNodeDrag({} as React.MouseEvent, c))
+    act(() => result.current.handleNodeDragStop({} as React.MouseEvent, c, [c]))
+    expect(insertNodeOnEdge).toHaveBeenCalledWith('e1', expect.objectContaining({ id: 'C' }), false)
+    expect(moveNodes).toHaveBeenCalledWith([{ id: 'C', position: { x: 150, y: 0 } }], { C: { x: 150, y: 0 } })
   })
 })

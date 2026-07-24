@@ -33,6 +33,7 @@ import {
 import { allocateCompactIdentifier, isLegacyGeneratedIdentifier } from "../domain/compactIdentifiers";
 import { GRID_SNAP } from "../../../state/types";
 import { resolveEdgeAttachment } from "../../../lib/floatingEdge";
+import { isEligibleInsertionEdge } from '../application/edgeInsertion';
 
 const NODE_COLLISION_GAP = 1;
 
@@ -956,6 +957,72 @@ export const createFlowchartSlice: StateCreator<
       }
     }
     get().commitLegacyHistory({ nodes, edges: [...edges, newEdge] });
+  },
+
+  insertNodeOnEdge: (edgeId, node, addNode = false) => {
+    const { nodes, edges, documentSession, isLocked } = get();
+    if (isLocked || (documentSession && !reportFlowchartSessionGuard(documentSession, 'insert node on edge', set))) return false;
+    const edge = edges.find(candidate => candidate.id === edgeId);
+    if (!edge || !isEligibleInsertionEdge(edge, nodes) || node.data.isSubgraph || node.data.isLane || edge.source === node.id || edge.target === node.id) return false;
+    const nodeId = documentSession && addNode
+      ? allocateCompactIdentifier('node', occupiedFlowchartElementIds(nodes, documentSession))
+      : node.id;
+    const insertedNode = nodeId === node.id ? node : { ...node, id: nodeId };
+    if (!addNode && (edges.some(candidate => candidate.id !== edgeId && (candidate.source === insertedNode.id || candidate.target === insertedNode.id)))) return false;
+    if (edges.some(candidate => candidate.id !== edgeId && ((candidate.source === edge.source && candidate.target === insertedNode.id) || (candidate.source === insertedNode.id && candidate.target === edge.target)))) return false;
+    const nextNodes = addNode ? [...nodes, insertedNode] : nodes.map(candidate => candidate.id === insertedNode.id ? { ...candidate, position: insertedNode.position } : candidate);
+    const routeMode = edge.data?.routeMode === 'manual' ? 'orthogonal' : edge.data?.routeMode ?? 'straight';
+    const firstAttachment = documentSession && flowchartNodeConnections(documentSession.layout).mode === 'side'
+      ? connectionAttachmentSides(nextNodes, edge.source, insertedNode.id) : undefined;
+    const secondAttachment = documentSession && flowchartNodeConnections(documentSession.layout).mode === 'side'
+      ? connectionAttachmentSides(nextNodes, insertedNode.id, edge.target) : undefined;
+    const legacySecondEdgeId = (() => {
+      const base = `e-${insertedNode.id}-${edge.target}`;
+      let candidate = base;
+      let suffix = 2;
+      while (edges.some(existing => existing.id === candidate)) candidate = `${base}-${suffix++}`;
+      return candidate;
+    })();
+    const secondEdge: Edge<FlowEdgeData> = {
+      id: legacySecondEdgeId,
+      source: insertedNode.id,
+      target: edge.target,
+      type: 'default',
+      data: { ...edge.data, label: undefined, explicitId: undefined, waypoints: undefined, routeMode, ...secondAttachment },
+    };
+    const firstEdge: Edge<FlowEdgeData> = {
+      ...edge,
+      target: insertedNode.id,
+      data: { ...edge.data, waypoints: undefined, routeMode, ...firstAttachment },
+    };
+    if (!documentSession) {
+      get().commitLegacyHistory({ nodes: nextNodes, edges: edges.flatMap(candidate => candidate.id === edgeId ? [firstEdge, secondEdge] : [candidate]) });
+      set({ announcement: 'Node inserted between connected nodes' });
+      return true;
+    }
+    const model = documentSession.projection.model as FlowchartAdapterModel;
+    if (!model.edgeLines.has(edgeId) || model.ambiguousNodeIds.has(edge.source) || model.ambiguousNodeIds.has(edge.target)) return false;
+    const secondEdgeId = nextFlowchartEdgeId(documentSession, insertedNode.id, edge.target);
+    if (insertedNode.data.shape === 'subgraph') return false;
+    const nextLayout = {
+      ...documentSession.layout,
+      elements: { ...documentSession.layout.elements, [`node:${insertedNode.id}`]: nodeGeometry(insertedNode) },
+      edges: {
+        ...documentSession.layout.edges,
+        [`edge:${edgeId}`]: { routeMode, ...firstAttachment },
+        [`edge:${secondEdgeId}`]: { routeMode, ...secondAttachment },
+      },
+    };
+    const operations: FlowchartSemanticOperation[] = [
+      ...(addNode ? [{ kind: 'add-node' as const, id: insertedNode.id, label: insertedNode.data.label, shape: insertedNode.data.shape, mermaidShape: insertedNode.data.mermaidShape }] : []),
+      { kind: 'update-edge', id: edgeId, target: insertedNode.id },
+      { kind: 'add-edge', id: secondEdgeId, source: insertedNode.id, target: edge.target, style: edge.data?.style ?? 'arrow' },
+    ];
+    const committed = commitFlowchartSemanticOperations(documentSession, operations, `Insert node ${insertedNode.id} on edge ${edgeId}`, [`node:${insertedNode.id}`], nextLayout);
+    if (!committed.ok) { set(reportCommandFailure(committed, 'insert node on edge')); return false; }
+    const projected = projectSessionModel(committed.value, nextNodes);
+    set({ documentSession: committed.value, codeSource: committed.value.source, ...projected, isDirty: committed.value.dirty, announcement: 'Node inserted between connected nodes' });
+    return true;
   },
 
   updateNodeLabel: (id, label) => {

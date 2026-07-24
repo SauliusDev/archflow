@@ -41,6 +41,64 @@ describe('createFlowchartSlice lock guards', () => {
   })
 })
 
+describe('createFlowchartSlice edge insertion', () => {
+  it('replaces a legacy edge in one history entry while preserving its label and style', () => {
+    const source = makeNode('A', { position: { x: 0, y: 0 } })
+    const target = makeNode('B', { position: { x: 300, y: 0 } })
+    const inserted = makeNode('C', { position: { x: 150, y: 0 } })
+    useStore.setState({
+      nodes: [source, target],
+      edges: [{ id: 'e1', source: 'A', target: 'B', data: { style: 'dotted', label: 'request', routeMode: 'straight' } }],
+      history: { past: [], future: [] }, documentSession: null, isLocked: false,
+    })
+
+    useStore.getState().insertNodeOnEdge('e1', inserted, true)
+
+    const state = useStore.getState()
+    expect(state.nodes.map(node => node.id)).toEqual(['A', 'B', 'C'])
+    expect(state.edges).toEqual([
+      expect.objectContaining({ id: 'e1', source: 'A', target: 'C', data: expect.objectContaining({ style: 'dotted', label: 'request', routeMode: 'straight', waypoints: undefined }) }),
+      expect.objectContaining({ source: 'C', target: 'B', data: expect.objectContaining({ style: 'dotted', label: undefined, routeMode: 'straight', waypoints: undefined }) }),
+    ])
+    expect(state.history.past).toHaveLength(1)
+  })
+
+  it('does not insert a connected existing node into an edge', () => {
+    const a = makeNode('A')
+    const b = makeNode('B')
+    const c = makeNode('C')
+    useStore.setState({
+      nodes: [a, b, c], edges: [
+        { id: 'e1', source: 'A', target: 'B', data: { style: 'arrow' } },
+        { id: 'e2', source: 'C', target: 'A', data: { style: 'arrow' } },
+      ], history: { past: [], future: [] }, documentSession: null, isLocked: false,
+    })
+    useStore.getState().insertNodeOnEdge('e1', c)
+    expect(useStore.getState().edges).toHaveLength(2)
+    expect(useStore.getState().history.past).toHaveLength(0)
+  })
+
+  it('normalizes a palette UUID and commits source, layout, and selection atomically', () => {
+    const source = 'flowchart LR\n  A[Alpha]\n  B[Beta]\n  A e1@-->|request| B\n'
+    const projection = flowchartCompatibilityAdapter.parse(source, 1)
+    const layout: LayoutStateV2 = { version: 2, diagramFamily: 'flowchart', viewport: { x: 0, y: 0, zoom: 1 }, elements: {}, edges: {}, constraints: [] }
+    useStore.getState().initializeDocumentSession(createDocumentSession('insert-session', 1, projection, layout))
+    useStore.setState({ nodes: [makeNode('A', { position: { x: 0, y: 0 } }), makeNode('B', { position: { x: 300, y: 0 } })], edges: projection.model.edges, isLocked: false })
+    const inserted = { ...makeNode('550e8400-e29b-41d4-a716-446655440000', { position: { x: 150, y: 0 } }), data: { label: 'Cache', shape: 'rectangle' as const } }
+
+    expect(useStore.getState().insertNodeOnEdge('e1', inserted, true)).toBe(true)
+
+    const state = useStore.getState()
+    const insertedNode = state.nodes.find(node => node.data.label === 'Cache')!
+    expect(insertedNode.id).toMatch(/^n\d+$/)
+    expect(state.documentSession?.source).toContain(`A e1@-->|request| ${insertedNode.id}`)
+    expect(state.documentSession?.source).toContain(`${insertedNode.id} e2@--> B`)
+    expect(state.documentSession?.selection).toEqual([`node:${insertedNode.id}`])
+    expect(state.documentSession?.layout.elements[`node:${insertedNode.id}`]).toMatchObject({ x: 150, y: 0 })
+    expect(state.documentSession?.history.past).toHaveLength(1)
+  })
+})
+
 describe('createFlowchartSlice shape geometry', () => {
   it('turns legacy circle and diamond nodes into centered square bounds', () => {
     useStore.setState({

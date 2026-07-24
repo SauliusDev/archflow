@@ -208,3 +208,18 @@
   min-width: 60px;
   max-width: 200px;
 }
+
+.canvas-edge-insertion-hint {
+  position: absolute;
+  z-index: 8;
+  top: var(--mv-space-3);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--mv-space-2) var(--mv-space-3);
+  border: 1px solid var(--mv-accent);
+  border-radius: var(--mv-radius-sm);
+  background: var(--mv-canvas-bg);
+  color: var(--mv-text-primary);
+  font-size: var(--mv-font-size-sm);
+  pointer-events: none;
+}

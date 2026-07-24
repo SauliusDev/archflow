@@ -55,10 +55,10 @@ function CanvasFlow({ snapToGrid, layoutStyle }: { snapToGrid: boolean; layoutSt
   const paperGridColors = PAPER_GRID_COLORS[colorMode]
   const fitViewOptions = paperGrid ? PAPER_GRID_FIT_VIEW_OPTIONS : CLASSIC_FIT_VIEW_OPTIONS
 
-  const { dropTargetId, escapingNodeIds, dragStartPositionsRef, handleNodeDragStart, handleNodeDrag, handleNodeDragStop } = useCanvasDrag()
+  const { dropTargetId, edgeInsertionId, escapingNodeIds, dragStartPositionsRef, handleNodeDragStart, handleNodeDrag, handleNodeDragStop } = useCanvasDrag()
   const { handleNodesChange, handleEdgesChange } = useCanvasFlowChanges(nodes, edges, dragStartPositionsRef)
   const { contextMenu, contextNode, containers, handleNodeContextMenu, closeContextMenu, duplicateNode, moveToSubgraph, moveToTopLevel, deleteNode, deleteLane } = useCanvasContextMenu()
-  const { handleCanvasDragOver, handleCanvasDrop } = useCanvasDrop(screenToFlowPosition, snapToGrid)
+  const { handleCanvasDragOver, handleCanvasDrop, edgeInsertionId: paletteEdgeInsertionId } = useCanvasDrop(screenToFlowPosition, snapToGrid)
   const { pendingConnect, handleNodeClick, handlePaneClick } = usePendingConnect(screenToFlowPosition, newEdgeRouteMode)
   const displayEdges = useMemo(() => pendingConnect?.kind === 'reassign'
     ? edges.filter(edge => edge.id !== pendingConnect.edgeId)
@@ -103,6 +103,7 @@ function CanvasFlow({ snapToGrid, layoutStyle }: { snapToGrid: boolean; layoutSt
     {inspectorVisible && <CanvasNodeInspector />}
     <ZoomBar layoutStyle={layoutStyle} />
     <div className="canvas-workarea" onClickCapture={handleCanvasClick}>
+      {(edgeInsertionId || paletteEdgeInsertionId) && <div className="canvas-edge-insertion-hint" role="status">Insert between nodes</div>}
       <ReactFlow
         nodes={displayNodes} edges={displayEdges} nodeTypes={nodeTypes} edgeTypes={edgeTypes}
         onNodesChange={handleNodesChange} onEdgesChange={handleEdgesChange}

@@ -153,6 +153,7 @@ export interface FlowchartSlice {
     sourceSide?: EdgeAttachmentSide;
     targetSide?: EdgeAttachmentSide;
   }, routeMode?: NewEdgeRouteMode) => void;
+  insertNodeOnEdge: (edgeId: string, node: Node<FlowNodeData>, addNode?: boolean) => boolean;
   setEdgeStyle: (id: string, style: EdgeStyle) => void;
   setEdgeRouteMode: (id: string, routeMode: EdgeRouteMode) => void;
   setAllEdgeRouteModes: (routeMode: Exclude<EdgeRouteMode, "manual">) => void;

@@ -3,6 +3,7 @@ import type { Node, XYPosition } from '@xyflow/react'
 import { useStore } from '@/state/createStore'
 import type { FlowNodeData } from '@/features/flowchart'
 import { constrainNodePositionToGroupBody, constrainTopLevelNodePositionOutsideGroup, findDropTargetSubgraph, groupBodyContainsNode, isNodeOutsideParent, toAbsolutePosition, toRelativePosition } from '@/features/flowchart'
+import { findEdgeInsertionCandidate } from '@/features/flowchart/application/edgeInsertion'
 
 export function useCanvasDrag() {
   const [dropTargetId, setDropTargetId] = useState<string | null>(null)
@@ -11,6 +12,8 @@ export function useCanvasDrag() {
   const moveNodes = useStore(state => state.moveNodes)
   const assignToSubgraph = useStore(state => state.assignToSubgraph)
   const removeFromSubgraph = useStore(state => state.removeFromSubgraph)
+  const insertNodeOnEdge = useStore(state => state.insertNodeOnEdge)
+  const [edgeInsertionId, setEdgeInsertionId] = useState<string | null>(null)
 
   function handleNodeDragStart(_event: React.MouseEvent, draggedNode: Node<FlowNodeData>, draggedNodes: Node<FlowNodeData>[]): void {
     const movingNodes = draggedNodes.length > 0 ? draggedNodes : [draggedNode]
@@ -19,6 +22,15 @@ export function useCanvasDrag() {
     useStore.getState().setSyncDirection('canvas')
   }
   function handleNodeDrag(_event: React.MouseEvent, draggedNode: Node<FlowNodeData>): void {
+    const state = useStore.getState()
+    const nodeCenter = {
+      x: draggedNode.position.x + (draggedNode.measured?.width ?? draggedNode.width ?? 160) / 2,
+      y: draggedNode.position.y + (draggedNode.measured?.height ?? draggedNode.height ?? 64) / 2,
+    }
+    const candidate = !draggedNode.parentId
+      ? findEdgeInsertionCandidate(nodeCenter, state.nodes, state.edges)
+      : null
+    setEdgeInsertionId(candidate && candidate.source !== draggedNode.id && candidate.target !== draggedNode.id ? candidate.id : null)
     if (draggedNode.parentId) {
       const parent = useStore.getState().nodes.find(node => node.id === draggedNode.parentId)
       if (parent && isNodeOutsideParent(draggedNode, parent)) {
@@ -31,8 +43,18 @@ export function useCanvasDrag() {
   }
   function handleNodeDragStop(_event: React.MouseEvent, draggedNode: Node<FlowNodeData>, draggedNodes: Node<FlowNodeData>[]): void {
     setDropTargetId(null)
+    const edgeId = edgeInsertionId
+    setEdgeInsertionId(null)
     const nodes = useStore.getState().nodes
     const movingNodes = draggedNodes.length > 0 ? draggedNodes : [draggedNode]
+    if (edgeId && movingNodes.length === 1 && !draggedNode.data.isSubgraph && !draggedNode.data.isLane) {
+      if (insertNodeOnEdge(edgeId, { ...draggedNode, position: draggedNode.position }, false)) {
+        dragStartPositionsRef.current = {}
+        setEscapingNodeIds(current => current.filter(id => id !== draggedNode.id))
+        useStore.getState().setSyncDirection(null)
+        return
+      }
+    }
     const toMove: Array<{ id: string; position: XYPosition }> = []
     for (const draggedNode of movingNodes) {
       if (draggedNode.parentId) {
@@ -64,5 +86,5 @@ export function useCanvasDrag() {
     setEscapingNodeIds(current => current.filter(id => !movingNodes.some(node => node.id === id)))
     useStore.getState().setSyncDirection(null)
   }
-  return { dropTargetId, escapingNodeIds, dragStartPositionsRef, handleNodeDragStart, handleNodeDrag, handleNodeDragStop }
+  return { dropTargetId, edgeInsertionId, escapingNodeIds, dragStartPositionsRef, handleNodeDragStart, handleNodeDrag, handleNodeDragStop }
 }
